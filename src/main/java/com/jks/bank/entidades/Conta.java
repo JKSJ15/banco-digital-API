@@ -55,6 +55,16 @@ public class Conta {
 
 	public Conta() {
 	}
+	
+	public void bloquearConta() {
+		usuario.setContaBloqueada(true);
+		status = StatusDaConta.BLOQUEADA;
+		}
+	
+	public void desbloquearConta() {
+		usuario.setContaBloqueada(false);
+		status = StatusDaConta.ATIVA;
+		}
 
 	public Long getVersion() {
 		return version;

@@ -42,7 +42,7 @@ public class Usuario implements UserDetails {
 	private LocalDate dataDaCriacao;
 
 	@Column(nullable = false)
-	private boolean contaNaoBloqueada = true;
+	private boolean contaBloqueada = false;
 
 	@OneToOne(fetch = FetchType.LAZY, mappedBy = "usuario", cascade = CascadeType.ALL)
 	private Conta conta;
@@ -54,7 +54,7 @@ public class Usuario implements UserDetails {
 		this.cpf = builder.cpf;
 		this.senha = builder.senha;
 		this.dataDaCriacao = builder.dataDaCriacao;
-		this.contaNaoBloqueada = builder.contaNaoBloqueada;
+		this.contaBloqueada = builder.contaBloqueada;
 		this.conta = builder.conta;
 	}
 
@@ -76,11 +76,10 @@ public class Usuario implements UserDetails {
 		return login;
 	}
 
-	@Override
-	public boolean isAccountNonLocked() {
-		return this.contaNaoBloqueada;
+	public boolean isAccountLocked() {
+		return this.contaBloqueada;
 	}
-
+	
 	public Long getId() {
 		return id;
 	}
@@ -125,12 +124,12 @@ public class Usuario implements UserDetails {
 		return dataDaCriacao;
 	}
 
-	public boolean isContaNaoBloqueada() {
-		return contaNaoBloqueada;
+	public boolean isContaBloqueada() {
+		return contaBloqueada;
 	}
 
-	public void setContaNaoBloqueada(boolean contaNaoBloqueada) {
-		this.contaNaoBloqueada = contaNaoBloqueada;
+	public void setContaBloqueada(boolean contaBloqueada) {
+		this.contaBloqueada = contaBloqueada;
 	}
 
 	public static Builder builder() {
@@ -144,7 +143,7 @@ public class Usuario implements UserDetails {
 		private String cpf;
 		private String senha;
 		private LocalDate dataDaCriacao;
-		private boolean contaNaoBloqueada = true;
+		private boolean contaBloqueada = false;
 		private Conta conta;
 
 		private Builder() {
@@ -180,8 +179,8 @@ public class Usuario implements UserDetails {
 			return this;
 		}
 
-		public Builder withContaNaoBloqueada(boolean contaNaoBloqueada) {
-			this.contaNaoBloqueada = contaNaoBloqueada;
+		public Builder withContaBloqueada(boolean contaBloqueada) {
+			this.contaBloqueada = contaBloqueada;
 			return this;
 		}
 
