@@ -1,6 +1,7 @@
 package com.jks.bank.entidades;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -30,7 +31,7 @@ public class Conta {
 
 	@Column(nullable = false)
 	private Long numero;
-	
+
 	@Column(nullable = false)
 	private String chavePix;
 
@@ -42,6 +43,9 @@ public class Conta {
 	@Enumerated(EnumType.STRING)
 	private StatusDaConta status;
 
+	@Column(nullable = false)
+	private LocalDate dataDaCriacao;
+
 	@JoinColumn(name = "id_usuario", nullable = false)
 	@OneToOne
 	private Usuario usuario;
@@ -51,27 +55,37 @@ public class Conta {
 		this.id = builder.id;
 		this.agencia = builder.agencia;
 		this.numero = builder.numero;
+		this.chavePix = builder.chavePix;
 		this.saldo = builder.saldo;
 		this.status = builder.status;
+		this.dataDaCriacao = builder.dataDaCriacao;
 		this.usuario = builder.usuario;
 	}
 
 	public Conta() {
 	}
-	
+
 	public void bloquearConta() {
 		usuario.setContaBloqueada(true);
 		status = StatusDaConta.BLOQUEADA;
 	}
-	
+
 	public void desbloquearConta() {
 		usuario.setContaBloqueada(false);
 		status = StatusDaConta.ATIVA;
 	}
-	
+
 	public void encerrarConta() {
 		usuario.setContaBloqueada(true);
 		status = StatusDaConta.ENCERRADA;
+	}
+
+	public LocalDate getDataDaCriacao() {
+		return dataDaCriacao;
+	}
+
+	public void setDataDaCriacao(LocalDate dataDaCriacao) {
+		this.dataDaCriacao = dataDaCriacao;
 	}
 
 	public Long getVersion() {
@@ -147,8 +161,10 @@ public class Conta {
 		private Long id;
 		private String agencia;
 		private Long numero;
+		private String chavePix;
 		private BigDecimal saldo;
 		private StatusDaConta status;
+		private LocalDate dataDaCriacao;
 		private Usuario usuario;
 
 		private Builder() {
@@ -174,6 +190,11 @@ public class Conta {
 			return this;
 		}
 
+		public Builder withChavePix(String chavePix) {
+			this.chavePix = chavePix;
+			return this;
+		}
+
 		public Builder withSaldo(BigDecimal saldo) {
 			this.saldo = saldo;
 			return this;
@@ -181,6 +202,11 @@ public class Conta {
 
 		public Builder withStatus(StatusDaConta status) {
 			this.status = status;
+			return this;
+		}
+
+		public Builder withDataDaCriacao(LocalDate dataDaCriacao) {
+			this.dataDaCriacao = dataDaCriacao;
 			return this;
 		}
 

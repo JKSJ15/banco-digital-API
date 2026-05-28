@@ -7,6 +7,6 @@ public class MapeamentoDeConta {
 
 	public ContaResponseDto ContaParadtoResponse(Conta conta) {
 		return new ContaResponseDto(conta.getId(), conta.getAgencia(), conta.getNumero(), conta.getChavePix(), conta.getSaldo(),
-				conta.getStatus());
+				conta.getStatus(), conta.getDataDaCriacao());
 	}
 }

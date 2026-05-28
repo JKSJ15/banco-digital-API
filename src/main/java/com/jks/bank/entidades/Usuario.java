@@ -32,14 +32,17 @@ public class Usuario implements UserDetails {
 	@Column(nullable = false)
 	private String login;
 
-	@Column(nullable = false)
+	@Column(nullable = false, unique = true)
 	private String cpf;
 
 	@Column(nullable = false)
 	private String senha;
 
+	@Column(nullable = false, unique = true)
+	private String telefone;
+
 	@Column(nullable = false)
-	private LocalDate dataDaCriacao;
+	private LocalDate dataNasc;
 
 	@Column(nullable = false)
 	private boolean contaBloqueada = false;
@@ -53,7 +56,7 @@ public class Usuario implements UserDetails {
 		this.login = builder.login;
 		this.cpf = builder.cpf;
 		this.senha = builder.senha;
-		this.dataDaCriacao = builder.dataDaCriacao;
+		this.dataNasc = builder.dataNasc;
 		this.contaBloqueada = builder.contaBloqueada;
 		this.conta = builder.conta;
 	}
@@ -76,10 +79,22 @@ public class Usuario implements UserDetails {
 		return login;
 	}
 
+	public String getTelefone() {
+		return telefone;
+	}
+
+	public void setTelefone(String telefone) {
+		this.telefone = telefone;
+	}
+
+	public void setDataNasc(LocalDate dataNasc) {
+		this.dataNasc = dataNasc;
+	}
+
 	public boolean isAccountLocked() {
 		return this.contaBloqueada;
 	}
-	
+
 	public Long getId() {
 		return id;
 	}
@@ -120,8 +135,8 @@ public class Usuario implements UserDetails {
 		this.senha = senha;
 	}
 
-	public LocalDate getDataDaCriacao() {
-		return dataDaCriacao;
+	public LocalDate getDataNasc() {
+		return dataNasc;
 	}
 
 	public boolean isContaBloqueada() {
@@ -142,7 +157,7 @@ public class Usuario implements UserDetails {
 		private String login;
 		private String cpf;
 		private String senha;
-		private LocalDate dataDaCriacao;
+		private LocalDate dataNasc;
 		private boolean contaBloqueada = false;
 		private Conta conta;
 
@@ -174,8 +189,8 @@ public class Usuario implements UserDetails {
 			return this;
 		}
 
-		public Builder withDataDaCriacao(LocalDate dataDaCriacao) {
-			this.dataDaCriacao = dataDaCriacao;
+		public Builder withDataNasc(LocalDate dataNasc) {
+			this.dataNasc = dataNasc;
 			return this;
 		}
 
