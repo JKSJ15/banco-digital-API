@@ -7,10 +7,14 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
 
-public record DepositoRequestDto (
-		@NotNull @Positive BigDecimal valor, 
+public record TransferenciaRequestDto (
+		@NotNull Long idContaDestino,
 		
-		@NotBlank String senha,
+		@NotNull @Positive(message = "valor inválido") BigDecimal valor,
+		
+		@NotBlank(message = "senha inválida!") String senha,
 		
 		@Size(max = 255) String descricao
-		) {}
+		){
+
+}

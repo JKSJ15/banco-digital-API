@@ -30,6 +30,9 @@ public class Conta {
 
 	@Column(nullable = false)
 	private Long numero;
+	
+	@Column(nullable = false)
+	private String chavePix;
 
 	@Column(nullable = false)
 	@PositiveOrZero
@@ -59,12 +62,17 @@ public class Conta {
 	public void bloquearConta() {
 		usuario.setContaBloqueada(true);
 		status = StatusDaConta.BLOQUEADA;
-		}
+	}
 	
 	public void desbloquearConta() {
 		usuario.setContaBloqueada(false);
 		status = StatusDaConta.ATIVA;
-		}
+	}
+	
+	public void encerrarConta() {
+		usuario.setContaBloqueada(true);
+		status = StatusDaConta.ENCERRADA;
+	}
 
 	public Long getVersion() {
 		return version;
@@ -72,6 +80,14 @@ public class Conta {
 
 	public void setVersion(Long version) {
 		this.version = version;
+	}
+
+	public String getChavePix() {
+		return chavePix;
+	}
+
+	public void setChavePix(String chavePix) {
+		this.chavePix = chavePix;
 	}
 
 	public Long getId() {
