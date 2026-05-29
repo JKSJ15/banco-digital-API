@@ -22,18 +22,16 @@ import jakarta.transaction.Transactional;
 public class ServicoConta {
 	private final RepositorioConta repConta;
 	private final RepositorioUsuario repUsuario;
-	private final MapeamentoDeConta mapeadorConta;
 
-	public ServicoConta(RepositorioConta repConta, RepositorioUsuario repUsuario, MapeamentoDeConta mapeadorConta) {
+	public ServicoConta(RepositorioConta repConta, RepositorioUsuario repUsuario) {
 		super();
 		this.repConta = repConta;
 		this.repUsuario = repUsuario;
-		this.mapeadorConta = mapeadorConta;
 	}
 
 	public ContaResponseDto contaUsuario() {
 		Conta conta = contaDoUsuarioAutenticado();
-		return mapeadorConta.ContaParadtoResponse(conta);
+		return MapeamentoDeConta.ContaParadtoResponse(conta);
 	}
 
 	@Transactional

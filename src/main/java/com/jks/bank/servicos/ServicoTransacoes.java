@@ -37,22 +37,20 @@ public class ServicoTransacoes {
 	private final RepositorioConta repConta;
 	private final RepositorioTransacao repTransacao;
 	private final RepositorioUsuario repUsuario;
-	private final MapeamentoDeTransacao mapeadorTransacao;
 
 	public ServicoTransacoes(RepositorioConta repConta, RepositorioTransacao repTransacao,
-			RepositorioUsuario repUsuario, MapeamentoDeTransacao mapeadorTransacao) {
+			RepositorioUsuario repUsuario) {
 		super();
 		this.repConta = repConta;
 		this.repTransacao = repTransacao;
 		this.repUsuario = repUsuario;
-		this.mapeadorTransacao = mapeadorTransacao;
 	}
 
 	public Page<TransacaoResponseDto> extrato(Pageable pageable) {
 		Conta conta = contaDoUsuarioAutenticado();
 		Page<Transacao> transacoes = repTransacao.findByContaOrigemIdOrContaDestinoId(conta.getId(), conta.getId(),
 				pageable);
-		return transacoes.map(mapeadorTransacao::transacaoParaDto);
+		return transacoes.map(MapeamentoDeTransacao::transacaoParaDto);
 	}
 
 	@Transactional
@@ -76,7 +74,7 @@ public class ServicoTransacoes {
 
 		repConta.save(conta);
 		repConta.save(contaDestino);
-		return mapeadorTransacao.transacaoParaDto(transacaoSalva);
+		return MapeamentoDeTransacao.transacaoParaDto(transacaoSalva);
 	}
 
 	@Transactional
@@ -100,7 +98,7 @@ public class ServicoTransacoes {
 
 		repConta.save(conta);
 		repConta.save(contaDestino);
-		return mapeadorTransacao.transacaoParaDto(transacaoSalva);
+		return MapeamentoDeTransacao.transacaoParaDto(transacaoSalva);
 	}
 
 	@Transactional
@@ -116,7 +114,7 @@ public class ServicoTransacoes {
 				saqueRequest.descricao(), saldoatual, conta.getSaldo());
 
 		repConta.save(conta);
-		return mapeadorTransacao.transacaoParaDto(transacaoSalva);
+		return MapeamentoDeTransacao.transacaoParaDto(transacaoSalva);
 	}
 
 	@Transactional
@@ -131,7 +129,7 @@ public class ServicoTransacoes {
 				depositoRequest.valor(), depositoRequest.descricao(), saldoAtual, contaDeposito.getSaldo());
 
 		repConta.save(contaDeposito);
-		return mapeadorTransacao.transacaoParaDto(transacaoSalva);
+		return MapeamentoDeTransacao.transacaoParaDto(transacaoSalva);
 	}
 
 	// MÉTODOS INTERNOS
@@ -183,11 +181,11 @@ public class ServicoTransacoes {
 			throw new ContaBloqueadaException("indisponível, sua conta está " + conta.getStatus());
 		}
 	}
-	
+
 	// private void validarSenha() {
-		// if (!passwordEncoder.matches(
-		// senha.senha(),
-		// usuario.getSenha()
-		// )) {
-		// throw new SenhaInvalidaException("senha inválida!");}}
+	// if (!passwordEncoder.matches(
+	// senha.senha(),
+	// usuario.getSenha()
+	// )) {
+	// throw new SenhaInvalidaException("senha inválida!");}}
 }
