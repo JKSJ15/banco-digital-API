@@ -9,7 +9,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import com.jks.bank.entidades.Usuario;
 import com.jks.bank.exceptions.UsuarioNaoEncontradoException;
 import com.jks.bank.repositorios.RepositorioUsuario;
-import com.jks.bank.servicos.JwtService;
+import com.jks.bank.servicos.ServicoJwt;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -17,10 +17,10 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 public class FiltroSeguranca extends OncePerRequestFilter {
-	private final JwtService jwt;
+	private final ServicoJwt jwt;
 	private final RepositorioUsuario usuarioRepositorio;
 
-	public FiltroSeguranca(JwtService jwt, RepositorioUsuario usuarioRepositorio) {
+	public FiltroSeguranca(ServicoJwt jwt, RepositorioUsuario usuarioRepositorio) {
 		super();
 		this.jwt = jwt;
 		this.usuarioRepositorio = usuarioRepositorio;

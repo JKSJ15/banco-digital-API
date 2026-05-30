@@ -6,11 +6,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.jks.bank.dto.LoginRequestDto;
-import com.jks.bank.dto.LoginResponseDto;
 import com.jks.bank.dto.RefreshRequestDto;
 import com.jks.bank.dto.RefreshResponseDto;
 import com.jks.bank.dto.RegistroRequestDto;
-import com.jks.bank.dto.RegistroResponseDto;
 import com.jks.bank.servicos.ServicoAutenticacao;
 
 @RestController
@@ -24,13 +22,13 @@ public class ControleAutenticacao {
 	}
 
 	@PostMapping("/login")
-	public ResponseEntity<LoginResponseDto> login(LoginRequestDto request) {
+	public ResponseEntity<RefreshResponseDto> login(LoginRequestDto request) {
 		servicoAutenticacao.login(request);
 		return ResponseEntity.ok().build();
 	}
 
 	@PostMapping("/registro")
-	public ResponseEntity<RegistroResponseDto> registro(RegistroRequestDto request) {
+	public ResponseEntity<Void> registro(RegistroRequestDto request) {
 		servicoAutenticacao.registro(request);
 		return ResponseEntity.noContent().build();
 	}

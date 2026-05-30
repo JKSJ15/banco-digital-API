@@ -30,7 +30,7 @@ public class RefreshToken {
 		this.expiraEm = builder.expiraEm;
 	}
 
-	public boolean estaExpirado() {
+	public boolean tokenEstaExpirado() {
 		if (expiraEm.isBefore(Instant.now())) {
 			return true;
 		}

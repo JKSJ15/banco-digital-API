@@ -14,7 +14,7 @@ import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.jks.bank.entidades.Usuario;
 
 @Service
-public class JwtService {
+public class ServicoJwt {
 	@Value("api.chavesecreta.bancodigital")
 	private String CHAVE_SECRETA;
 	private Algorithm algorithm = Algorithm.HMAC256(CHAVE_SECRETA);
@@ -43,15 +43,15 @@ public class JwtService {
 	public String criarRefreshToken(Usuario usuario) {
 		try {
 			return JWT.create().withExpiresAt(Date.from(criarTempoDeExpiracaoRefreshToken()))
-					.withIssuer("BancoDigitalAPI").sign(algorithm);
+					.withIssuer("BancoDigitalAPI").withSubject(usuario.getUsername()).sign(algorithm);
 		} catch (JWTCreationException e) {
 			throw new RuntimeException("erro na geração do token");
 		}
 	}
 
-	public boolean validarRefreshToken(String token) {
+	public boolean validarRefreshToken(String token, Usuario usuario) {
 		try {
-			JWT.require(algorithm).withIssuer("BancoDigitalAPI").build().verify(token).getSubject();
+			JWT.require(algorithm).withIssuer("BancoDigitalAPI").withSubject(usuario.getUsername()).build().verify(token);
 			return true;
 		} catch (JWTVerificationException e) {
 			return false;

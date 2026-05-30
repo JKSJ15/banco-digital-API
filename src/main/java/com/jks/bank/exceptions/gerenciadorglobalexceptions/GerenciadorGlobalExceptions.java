@@ -12,8 +12,12 @@ import com.jks.bank.exceptions.ContaComDinheiroException;
 import com.jks.bank.exceptions.ContaEncerradaException;
 import com.jks.bank.exceptions.ContaNaoEncontradaException;
 import com.jks.bank.exceptions.CorpoException;
+import com.jks.bank.exceptions.IdadeNaoPermitidaException;
+import com.jks.bank.exceptions.RefreshTokenInvalidoException;
 import com.jks.bank.exceptions.SaldoInsuficienteException;
+import com.jks.bank.exceptions.SenhaInvalidaException;
 import com.jks.bank.exceptions.TransferenciaInvalidaException;
+import com.jks.bank.exceptions.UsuarioJaExisteException;
 import com.jks.bank.exceptions.UsuarioNaoEncontradoException;
 import com.jks.bank.exceptions.ValorInvalidoException;
 
@@ -71,6 +75,30 @@ public class GerenciadorGlobalExceptions {
 
 	@ExceptionHandler(value = ContaComDinheiroException.class)
 	public ResponseEntity<CorpoException> usaContaComDinheiroException(ContaComDinheiroException e) {
+		CorpoException corpo = new CorpoException(e.getMessage(), LocalDateTime.now(), HttpStatus.BAD_REQUEST,
+				HttpStatus.BAD_REQUEST.value());
+		return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(corpo);
+	}
+	@ExceptionHandler(value = RefreshTokenInvalidoException.class)
+	public ResponseEntity<CorpoException> usaRefreshTokenInvalidoException(RefreshTokenInvalidoException e) {
+		CorpoException corpo = new CorpoException(e.getMessage(), LocalDateTime.now(), HttpStatus.FORBIDDEN,
+				HttpStatus.FORBIDDEN.value());
+		return ResponseEntity.status(HttpStatus.FORBIDDEN).body(corpo);
+	}
+	@ExceptionHandler(value = IdadeNaoPermitidaException.class)
+	public ResponseEntity<CorpoException> usaIdadeNaoPermitidaException(IdadeNaoPermitidaException e) {
+		CorpoException corpo = new CorpoException(e.getMessage(), LocalDateTime.now(), HttpStatus.BAD_REQUEST,
+				HttpStatus.BAD_REQUEST.value());
+		return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(corpo);
+	}
+	@ExceptionHandler(value = UsuarioJaExisteException.class)
+	public ResponseEntity<CorpoException> usaUsuarioJaExisteException(UsuarioJaExisteException e) {
+		CorpoException corpo = new CorpoException(e.getMessage(), LocalDateTime.now(), HttpStatus.BAD_REQUEST,
+				HttpStatus.BAD_REQUEST.value());
+		return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(corpo);
+	}
+	@ExceptionHandler(value = SenhaInvalidaException.class)
+	public ResponseEntity<CorpoException> usaSenhaInvalidaException(SenhaInvalidaException e) {
 		CorpoException corpo = new CorpoException(e.getMessage(), LocalDateTime.now(), HttpStatus.BAD_REQUEST,
 				HttpStatus.BAD_REQUEST.value());
 		return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(corpo);

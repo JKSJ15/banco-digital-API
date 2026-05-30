@@ -26,13 +26,13 @@ public class Conta {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
-	@Column(nullable = false)
-	private String agencia;
+	@Column
+	private Long agencia;
 
-	@Column(nullable = false)
-	private Long numero;
+	@Column(nullable = false, unique = true)
+	private String numero;
 
-	@Column(nullable = false)
+	@Column(nullable = false, unique = true)
 	private String chavePix;
 
 	@Column(nullable = false)
@@ -51,8 +51,6 @@ public class Conta {
 	private Usuario usuario;
 
 	private Conta(Builder builder) {
-		this.version = builder.version;
-		this.id = builder.id;
 		this.agencia = builder.agencia;
 		this.numero = builder.numero;
 		this.chavePix = builder.chavePix;
@@ -112,19 +110,19 @@ public class Conta {
 		this.id = id;
 	}
 
-	public String getAgencia() {
+	public Long getAgencia() {
 		return agencia;
 	}
 
-	public void setAgencia(String agencia) {
+	public void setAgencia(Long agencia) {
 		this.agencia = agencia;
 	}
 
-	public Long getNumero() {
+	public String getNumero() {
 		return numero;
 	}
 
-	public void setNumero(Long numero) {
+	public void setNumero(String numero) {
 		this.numero = numero;
 	}
 
@@ -157,10 +155,8 @@ public class Conta {
 	}
 
 	public static final class Builder {
-		private Long version;
-		private Long id;
-		private String agencia;
-		private Long numero;
+		private Long agencia;
+		private String numero;
 		private String chavePix;
 		private BigDecimal saldo;
 		private StatusDaConta status;
@@ -170,22 +166,12 @@ public class Conta {
 		private Builder() {
 		}
 
-		public Builder withVersion(Long version) {
-			this.version = version;
-			return this;
-		}
-
-		public Builder withId(Long id) {
-			this.id = id;
-			return this;
-		}
-
-		public Builder withAgencia(String agencia) {
+		public Builder withAgencia(Long agencia) {
 			this.agencia = agencia;
 			return this;
 		}
 
-		public Builder withNumero(Long numero) {
+		public Builder withNumero(String numero) {
 			this.numero = numero;
 			return this;
 		}

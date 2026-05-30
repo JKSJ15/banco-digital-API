@@ -1,5 +1,5 @@
 package com.jks.bank.dto;
 
-public class RefreshRequestDto {
+import jakarta.validation.constraints.NotBlank;
 
-}
+public record RefreshRequestDto (@NotBlank String refreshToken){}

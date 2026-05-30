@@ -6,6 +6,7 @@ import java.time.LocalDateTime;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.jks.bank.dto.DepositoRequestDto;
@@ -22,6 +23,7 @@ import com.jks.bank.exceptions.ContaBloqueadaException;
 import com.jks.bank.exceptions.ContaEncerradaException;
 import com.jks.bank.exceptions.ContaNaoEncontradaException;
 import com.jks.bank.exceptions.SaldoInsuficienteException;
+import com.jks.bank.exceptions.SenhaInvalidaException;
 import com.jks.bank.exceptions.TransferenciaInvalidaException;
 import com.jks.bank.exceptions.UsuarioNaoEncontradoException;
 import com.jks.bank.exceptions.ValorInvalidoException;
@@ -37,13 +39,15 @@ public class ServicoTransacoes {
 	private final RepositorioConta repConta;
 	private final RepositorioTransacao repTransacao;
 	private final RepositorioUsuario repUsuario;
+	private final PasswordEncoder passwordEncoder;
 
 	public ServicoTransacoes(RepositorioConta repConta, RepositorioTransacao repTransacao,
-			RepositorioUsuario repUsuario) {
+			RepositorioUsuario repUsuario, PasswordEncoder passwordEncoder) {
 		super();
 		this.repConta = repConta;
 		this.repTransacao = repTransacao;
 		this.repUsuario = repUsuario;
+		this.passwordEncoder = passwordEncoder;
 	}
 
 	public Page<TransacaoResponseDto> extrato(Pageable pageable) {
@@ -171,7 +175,7 @@ public class ServicoTransacoes {
 		String login = SecurityContextHolder.getContext().getAuthentication().getName();
 		Usuario usuario = repUsuario.findByLogin(login)
 				.orElseThrow(() -> new UsuarioNaoEncontradoException("usuario não encontado!"));
-		Conta conta = repConta.findByUsuario(usuario.getId())
+		Conta conta = repConta.findByUsuarioId(usuario.getId())
 				.orElseThrow(() -> new ContaNaoEncontradaException("Conta não encontrada!"));
 		return conta;
 	}
@@ -182,10 +186,9 @@ public class ServicoTransacoes {
 		}
 	}
 
-	// private void validarSenha() {
-	// if (!passwordEncoder.matches(
-	// senha.senha(),
-	// usuario.getSenha()
-	// )) {
-	// throw new SenhaInvalidaException("senha inválida!");}}
+	private void validarSenha(String senhaUsuario, String senha) {
+		if (!passwordEncoder.matches(senha, senhaUsuario)) {
+			throw new SenhaInvalidaException("senha inválida!");
+		}
+	}
 }

@@ -1,5 +1,3 @@
 package com.jks.bank.dto;
 
-public class RefreshResponseDto {
-
-}
+public record RefreshResponseDto (String tokenAcesso, String refreshToken){}

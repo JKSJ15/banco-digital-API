@@ -1,5 +1,5 @@
 package com.jks.bank.dto;
 
-public class LoginRequestDto {
+import jakarta.validation.constraints.NotBlank;
 
-}
+public record LoginRequestDto (@NotBlank String login, @NotBlank String senha){}

@@ -8,7 +8,7 @@ import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
 
 public record PixRequestDto (
-		@NotBlank String chavePix,
+		@NotNull String chavePix,
 		
 		@NotNull @Positive BigDecimal valor,
 		
