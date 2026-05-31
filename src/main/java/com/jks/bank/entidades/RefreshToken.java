@@ -31,6 +31,7 @@ public class RefreshToken {
 		this.usuario = builder.usuario;
 		this.expiraEm = builder.expiraEm;
 	}
+	public RefreshToken() {}
 
 	public boolean tokenEstaExpirado() {
 		if (expiraEm.isBefore(Instant.now())) {

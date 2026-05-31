@@ -3,12 +3,15 @@ package com.jks.bank.controles;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.jks.bank.dto.ContaResponseDto;
 import com.jks.bank.dto.SenhaDto;
 import com.jks.bank.servicos.ServicoConta;
+
+import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/conta")
@@ -26,19 +29,19 @@ public class ControleConta {
 	}
 
 	@PostMapping("/bloquear")
-	public ResponseEntity<Void> bloquearConta(SenhaDto senha) {
+	public ResponseEntity<Void> bloquearConta(@RequestBody @Valid SenhaDto senha) {
 		servConta.bloquearConta(senha);
 		return ResponseEntity.noContent().build();
 	}
 
 	@PostMapping("/desbloquear")
-	public ResponseEntity<Void> desbloquearConta(SenhaDto senha) {
+	public ResponseEntity<Void> desbloquearConta(@RequestBody @Valid SenhaDto senha) {
 		servConta.desbloquearConta(senha);
 		return ResponseEntity.noContent().build();
 	}
 
 	@PostMapping("/encerrar")
-	public ResponseEntity<Void> encerrarConta(SenhaDto senha) {
+	public ResponseEntity<Void> encerrarConta(@RequestBody @Valid SenhaDto senha) {
 		servConta.encerrarConta(senha);
 		return ResponseEntity.noContent().build();
 	}

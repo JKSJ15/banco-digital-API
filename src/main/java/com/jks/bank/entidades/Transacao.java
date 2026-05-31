@@ -36,11 +36,11 @@ public class Transacao {
 	private String descricao;
 
 	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "conta_origem_id")
+	@JoinColumn(name = "conta_origem_id", nullable = true)
 	private Conta contaOrigem;
 
 	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "conta_destino_id")
+	@JoinColumn(name = "conta_destino_id", nullable = true)
 	private Conta contaDestino;
 
 	@Column(nullable = false)

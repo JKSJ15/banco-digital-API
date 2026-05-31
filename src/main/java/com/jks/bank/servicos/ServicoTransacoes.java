@@ -126,10 +126,12 @@ public class ServicoTransacoes {
 
 	@Transactional
 	public TransacaoResponseDto deposito(DepositoRequestDto depositoRequest) {
+		System.out.println("depsoito: "+depositoRequest);
 		validarSenha(depositoRequest.senha());
 		validarValor(depositoRequest.valor());
 		Conta contaDeposito = contaDoUsuarioAutenticado();
 
+		System.out.println("depsoito: "+depositoRequest);
 		BigDecimal saldoAtual = contaDeposito.getSaldo();
 		depositar(contaDeposito, depositoRequest.valor());
 
@@ -149,7 +151,7 @@ public class ServicoTransacoes {
 
 	private void depositar(Conta conta, BigDecimal valor) {
 		if (conta.getStatus() == StatusDaConta.ENCERRADA) {
-			throw new ContaEncerradaException("indisponível, sua conta está " + conta.getStatus());
+			throw new ContaEncerradaException("indisponível, a conta ID:"+conta.getId()+" está " + conta.getStatus());
 		}
 		BigDecimal saldoatual = conta.getSaldo();
 		BigDecimal saldoPosDeposito = saldoatual.add(valor);

@@ -8,8 +8,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.jks.bank.dto.LoginRequestDto;
 import com.jks.bank.dto.RefreshRequestDto;
-import com.jks.bank.dto.TokensResponse;
 import com.jks.bank.dto.RegistroRequestDto;
+import com.jks.bank.dto.TokensResponse;
 import com.jks.bank.servicos.ServicoAutenticacao;
 
 @RestController
@@ -35,7 +35,6 @@ public class ControleAutenticacao {
 
 	@PostMapping("/refresh")
 	public ResponseEntity<TokensResponse> refresh(@RequestBody RefreshRequestDto request) {
-		servicoAutenticacao.refresh(request);
-		return ResponseEntity.ok().build();
+		return ResponseEntity.ok(servicoAutenticacao.refresh(request));
 	}
 }

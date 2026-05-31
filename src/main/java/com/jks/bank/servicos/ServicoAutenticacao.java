@@ -63,7 +63,6 @@ public class ServicoAutenticacao {
 		String tokenAcesso = servicoJwt.criarTokenDeAcesso(usuario);
 		servicoRefreshToken.gerarEntidadeRefreshToken(refreshToken, usuario);
 		TokensResponse tokensResponse = new TokensResponse(tokenAcesso, refreshToken);
-		System.out.println(tokensResponse);
 		return tokensResponse;
 	}
 
