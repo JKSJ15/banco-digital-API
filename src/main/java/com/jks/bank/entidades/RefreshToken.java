@@ -8,6 +8,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 
 @Entity
@@ -18,7 +19,8 @@ public class RefreshToken {
 	private Long id;
 	@Column(name = "token", unique = true, nullable = false)
 	private String token;
-	@JoinColumn(name = "usuario_id")
+	@ManyToOne
+	@JoinColumn(name = "usuario_id", nullable = false)
 	private Usuario usuario;
 	@Column(name = "expira_em", unique = true, nullable = false)
 	private Instant expiraEm;

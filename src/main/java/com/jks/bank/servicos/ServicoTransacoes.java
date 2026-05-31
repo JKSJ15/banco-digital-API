@@ -59,6 +59,7 @@ public class ServicoTransacoes {
 
 	@Transactional
 	public TransacaoResponseDto transferencia(TransferenciaRequestDto transferenciaRequest) {
+		validarSenha(transferenciaRequest.senha());
 		validarValor(transferenciaRequest.valor());
 		Conta conta = contaDoUsuarioAutenticado();
 		validarMovimentacaoDeSaida(conta);
@@ -83,6 +84,7 @@ public class ServicoTransacoes {
 
 	@Transactional
 	public TransacaoResponseDto pix(PixRequestDto pixRequest) {
+		validarSenha(pixRequest.senha());
 		validarValor(pixRequest.valor());
 		Conta conta = contaDoUsuarioAutenticado();
 		validarMovimentacaoDeSaida(conta);
@@ -107,6 +109,7 @@ public class ServicoTransacoes {
 
 	@Transactional
 	public TransacaoResponseDto saque(SaqueRequestDto saqueRequest) {
+		validarSenha(saqueRequest.senha());
 		validarValor(saqueRequest.valor());
 		Conta conta = contaDoUsuarioAutenticado();
 		validarMovimentacaoDeSaida(conta);
@@ -123,6 +126,7 @@ public class ServicoTransacoes {
 
 	@Transactional
 	public TransacaoResponseDto deposito(DepositoRequestDto depositoRequest) {
+		validarSenha(depositoRequest.senha());
 		validarValor(depositoRequest.valor());
 		Conta contaDeposito = contaDoUsuarioAutenticado();
 
@@ -186,8 +190,11 @@ public class ServicoTransacoes {
 		}
 	}
 
-	private void validarSenha(String senhaUsuario, String senha) {
-		if (!passwordEncoder.matches(senha, senhaUsuario)) {
+	private void validarSenha(String senha) {
+		String login = SecurityContextHolder.getContext().getAuthentication().getName();
+		Usuario usuario = repUsuario.findByLogin(login)
+				.orElseThrow(() -> new UsuarioNaoEncontradoException("usuario não encontado!"));
+		if (!passwordEncoder.matches(senha, usuario.getPassword())) {
 			throw new SenhaInvalidaException("senha inválida!");
 		}
 	}

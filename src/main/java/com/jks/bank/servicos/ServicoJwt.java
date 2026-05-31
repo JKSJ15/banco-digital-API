@@ -15,9 +15,11 @@ import com.jks.bank.entidades.Usuario;
 
 @Service
 public class ServicoJwt {
-	@Value("api.chavesecreta.bancodigital")
-	private String CHAVE_SECRETA;
-	private Algorithm algorithm = Algorithm.HMAC256(CHAVE_SECRETA);
+	private Algorithm algorithm;
+	
+	public ServicoJwt(@Value("${api.security.token.secret}") String CHAVE_SECRETA) {
+		this.algorithm = Algorithm.HMAC256(CHAVE_SECRETA);
+	}
 
 	// TOKEN ACESSO
 	public String criarTokenDeAcesso(Usuario usuario) {

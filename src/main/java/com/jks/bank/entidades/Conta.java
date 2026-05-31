@@ -1,5 +1,6 @@
 package com.jks.bank.entidades;
 
+import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
@@ -18,7 +19,9 @@ import jakarta.validation.constraints.PositiveOrZero;
 
 @Entity
 @Table
-public class Conta {
+public class Conta implements Serializable {
+    private static final long serialVersionUID = 1L;
+    
 	@Version
 	private Long version;
 
@@ -27,7 +30,7 @@ public class Conta {
 	private Long id;
 
 	@Column
-	private Long agencia;
+	private String agencia;
 
 	@Column(nullable = false, unique = true)
 	private String numero;
@@ -51,6 +54,8 @@ public class Conta {
 	private Usuario usuario;
 
 	private Conta(Builder builder) {
+		this.version = builder.version;
+		this.id = builder.id;
 		this.agencia = builder.agencia;
 		this.numero = builder.numero;
 		this.chavePix = builder.chavePix;
@@ -110,11 +115,11 @@ public class Conta {
 		this.id = id;
 	}
 
-	public Long getAgencia() {
+	public String getAgencia() {
 		return agencia;
 	}
 
-	public void setAgencia(Long agencia) {
+	public void setAgencia(String agencia) {
 		this.agencia = agencia;
 	}
 
@@ -155,7 +160,9 @@ public class Conta {
 	}
 
 	public static final class Builder {
-		private Long agencia;
+		private Long version;
+		private Long id;
+		private String agencia;
 		private String numero;
 		private String chavePix;
 		private BigDecimal saldo;
@@ -166,7 +173,17 @@ public class Conta {
 		private Builder() {
 		}
 
-		public Builder withAgencia(Long agencia) {
+		public Builder withVersion(Long version) {
+			this.version = version;
+			return this;
+		}
+
+		public Builder withId(Long id) {
+			this.id = id;
+			return this;
+		}
+
+		public Builder withAgencia(String agencia) {
 			this.agencia = agencia;
 			return this;
 		}

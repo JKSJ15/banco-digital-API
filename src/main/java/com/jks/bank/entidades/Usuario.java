@@ -44,7 +44,7 @@ public class Usuario implements UserDetails {
 	@Column(nullable = false)
 	private LocalDate dataNasc;
 
-	@Column(nullable = false)
+	@Column(name = "conta_bloqueada" ,nullable = false)
 	private boolean contaBloqueada = false;
 
 	@OneToOne(fetch = FetchType.LAZY, mappedBy = "usuario", cascade = CascadeType.ALL)
@@ -56,6 +56,7 @@ public class Usuario implements UserDetails {
 		this.login = builder.login;
 		this.cpf = builder.cpf;
 		this.senha = builder.senha;
+		this.telefone = builder.telefone;
 		this.dataNasc = builder.dataNasc;
 		this.contaBloqueada = builder.contaBloqueada;
 		this.conta = builder.conta;
@@ -157,6 +158,7 @@ public class Usuario implements UserDetails {
 		private String login;
 		private String cpf;
 		private String senha;
+		private String telefone;
 		private LocalDate dataNasc;
 		private boolean contaBloqueada = false;
 		private Conta conta;
@@ -186,6 +188,11 @@ public class Usuario implements UserDetails {
 
 		public Builder withSenha(String senha) {
 			this.senha = senha;
+			return this;
+		}
+
+		public Builder withTelefone(String telefone) {
+			this.telefone = telefone;
 			return this;
 		}
 

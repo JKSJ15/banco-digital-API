@@ -28,7 +28,7 @@ public class ConfigSecuranca {
 				.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 				.httpBasic(Customizer.withDefaults())
 				.authorizeHttpRequests(auth -> auth.
-						requestMatchers(HttpMethod.POST, "/auth/login", "/auth/registro", "/auth/refresh").permitAll()
+						requestMatchers(HttpMethod.POST, "/auth/**").permitAll()
 								.anyRequest().authenticated())
 				.addFilterBefore(filtro, UsernamePasswordAuthenticationFilter.class).build();
 	}

@@ -5,6 +5,6 @@ import java.time.LocalDate;
 
 import com.jks.bank.entidades.StatusDaConta;
 
-public record ContaResponseDto(Long id, Long agencia, String numero, String chavePix, BigDecimal saldo,
+public record ContaResponseDto(Long id, String agencia, String numero, String chavePix, BigDecimal saldo,
 		StatusDaConta status, LocalDate dataCriacao) {
 }

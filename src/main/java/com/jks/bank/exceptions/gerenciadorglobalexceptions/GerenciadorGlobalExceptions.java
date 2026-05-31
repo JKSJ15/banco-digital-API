@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
@@ -79,24 +80,28 @@ public class GerenciadorGlobalExceptions {
 				HttpStatus.BAD_REQUEST.value());
 		return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(corpo);
 	}
+
 	@ExceptionHandler(value = RefreshTokenInvalidoException.class)
 	public ResponseEntity<CorpoException> usaRefreshTokenInvalidoException(RefreshTokenInvalidoException e) {
 		CorpoException corpo = new CorpoException(e.getMessage(), LocalDateTime.now(), HttpStatus.FORBIDDEN,
 				HttpStatus.FORBIDDEN.value());
 		return ResponseEntity.status(HttpStatus.FORBIDDEN).body(corpo);
 	}
+
 	@ExceptionHandler(value = IdadeNaoPermitidaException.class)
 	public ResponseEntity<CorpoException> usaIdadeNaoPermitidaException(IdadeNaoPermitidaException e) {
 		CorpoException corpo = new CorpoException(e.getMessage(), LocalDateTime.now(), HttpStatus.BAD_REQUEST,
 				HttpStatus.BAD_REQUEST.value());
 		return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(corpo);
 	}
+
 	@ExceptionHandler(value = UsuarioJaExisteException.class)
 	public ResponseEntity<CorpoException> usaUsuarioJaExisteException(UsuarioJaExisteException e) {
 		CorpoException corpo = new CorpoException(e.getMessage(), LocalDateTime.now(), HttpStatus.BAD_REQUEST,
 				HttpStatus.BAD_REQUEST.value());
 		return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(corpo);
 	}
+
 	@ExceptionHandler(value = SenhaInvalidaException.class)
 	public ResponseEntity<CorpoException> usaSenhaInvalidaException(SenhaInvalidaException e) {
 		CorpoException corpo = new CorpoException(e.getMessage(), LocalDateTime.now(), HttpStatus.BAD_REQUEST,
@@ -104,5 +109,10 @@ public class GerenciadorGlobalExceptions {
 		return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(corpo);
 	}
 
-	// @ExceptionHandler(MethodArgumentNotValidException.class)
+	@ExceptionHandler(MethodArgumentNotValidException.class)
+	public ResponseEntity<CorpoException> usaMethodArgumentNotValidException(MethodArgumentNotValidException e) {
+		CorpoException corpo = new CorpoException(e.getMessage(), LocalDateTime.now(), HttpStatus.BAD_REQUEST,
+				HttpStatus.BAD_REQUEST.value());
+		return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(corpo);
+	}
 }

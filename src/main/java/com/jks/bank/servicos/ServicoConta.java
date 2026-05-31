@@ -40,18 +40,22 @@ public class ServicoConta {
 
 	@Transactional
 	public void bloquearConta(SenhaDto senha) {
+		validarSenha(senha.senha());
 		Conta conta = contaDoUsuarioAutenticado();
 		conta.bloquearConta();
 	}
 
 	@Transactional
 	public void desbloquearConta(SenhaDto senha) {
+		validarSenha(senha.senha());
 		Conta conta = contaDoUsuarioAutenticado();
 		conta.desbloquearConta();
 	}
 
 	@Transactional
 	public void encerrarConta(SenhaDto senha) {
+		validarSenha(senha.senha());
+
 		Conta conta = contaDoUsuarioAutenticado();
 		if (conta.getSaldo().compareTo(BigDecimal.ZERO) > 0) {
 			throw new ContaComDinheiroException("não foi possível encerrar sua conta, pois ela contém dinheiro!");
@@ -70,8 +74,11 @@ public class ServicoConta {
 		return conta;
 	}
 
-	private void validarSenha(String senhaUsuario, String senha) {
-		if (!passwordEncoder.matches(senha, senhaUsuario)) {
+	private void validarSenha(String senha) {
+		String login = SecurityContextHolder.getContext().getAuthentication().getName();
+		Usuario usuario = repUsuario.findByLogin(login)
+				.orElseThrow(() -> new UsuarioNaoEncontradoException("usuario não encontado!"));
+		if (!passwordEncoder.matches(senha, usuario.getPassword())) {
 			throw new SenhaInvalidaException("senha inválida!");
 		}
 	}
