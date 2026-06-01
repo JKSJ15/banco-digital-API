@@ -103,7 +103,7 @@ public class ServicoAutenticacao {
 	// MÉTODOS INTERNOS
 	private void validarRequestRegistro(RegistroRequestDto request) {
 		if (request.dataNascimento() == null) {
-		    throw new ValorInvalidoException("data de nascimento é obrigatória");
+			throw new ValorInvalidoException("data de nascimento é obrigatória");
 		}
 		if (ChronoUnit.YEARS.between(request.dataNascimento(), LocalDate.now()) < 18) {
 			throw new IdadeNaoPermitidaException("voce ainda não possui a idade necessária para criar uma conta!");

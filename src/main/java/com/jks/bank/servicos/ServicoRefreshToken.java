@@ -33,12 +33,12 @@ public class ServicoRefreshToken {
 		return repositorioRefreshToken.findByToken(refreshToken)
 				.orElseThrow(() -> new RefreshTokenInvalidoException("refresh token inválido!"));
 	}
-	
+
 	public void validarEntidadeRefreshToken(String refreshToken) {
 		RefreshToken refresh = repositorioRefreshToken.findByToken(refreshToken)
 				.orElseThrow(() -> new RefreshTokenInvalidoException("refresh token inválido!"));
-		if(refresh.tokenEstaExpirado()) {
+		if (refresh.tokenEstaExpirado()) {
 			throw new RefreshTokenInvalidoException("refresh token inválido!");
-			}
+		}
 	}
 }

@@ -8,9 +8,9 @@ import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
 
 public record DepositoRequestDto (
-		@NotNull @Positive BigDecimal valor, 
+		@NotNull(message = "valor não pode ser nulo!") @Positive(message = "valor inválido!") BigDecimal valor, 
 		
-		@NotBlank String senha,
+		@NotBlank(message = "senha inválida!") String senha,
 		
-		@Size(max = 255) String descricao
+		@Size(max = 255, message = "descricao não pode ultrapassar 255 caracteres!") String descricao
 		) {}

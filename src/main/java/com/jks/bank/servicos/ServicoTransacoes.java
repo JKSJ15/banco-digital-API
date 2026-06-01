@@ -40,6 +40,10 @@ public class ServicoTransacoes {
 	private final RepositorioTransacao repTransacao;
 	private final RepositorioUsuario repUsuario;
 	private final PasswordEncoder passwordEncoder;
+	private static final BigDecimal LIMITE_TRANSFERENCIA = BigDecimal.valueOf(10000);
+	private static final BigDecimal LIMITE_SAQUE = BigDecimal.valueOf(5000);
+	private static final BigDecimal LIMITE_PIX = BigDecimal.valueOf(10000);
+	private static final BigDecimal LIMITE_DEPOSITO = BigDecimal.valueOf(50000);
 
 	public ServicoTransacoes(RepositorioConta repConta, RepositorioTransacao repTransacao,
 			RepositorioUsuario repUsuario, PasswordEncoder passwordEncoder) {
@@ -54,13 +58,14 @@ public class ServicoTransacoes {
 		Conta conta = contaDoUsuarioAutenticado();
 		Page<Transacao> transacoes = repTransacao.findByContaOrigemIdOrContaDestinoId(conta.getId(), conta.getId(),
 				pageable);
+
 		return transacoes.map(MapeamentoDeTransacao::transacaoParaDto);
 	}
 
 	@Transactional
 	public TransacaoResponseDto transferencia(TransferenciaRequestDto transferenciaRequest) {
 		validarSenha(transferenciaRequest.senha());
-		validarValor(transferenciaRequest.valor());
+		validarLimite(transferenciaRequest.valor(), LIMITE_TRANSFERENCIA, "TRANSFERENCIA");
 		Conta conta = contaDoUsuarioAutenticado();
 		validarMovimentacaoDeSaida(conta);
 		Conta contaDestino = repConta.findById(transferenciaRequest.idContaDestino())
@@ -85,7 +90,7 @@ public class ServicoTransacoes {
 	@Transactional
 	public TransacaoResponseDto pix(PixRequestDto pixRequest) {
 		validarSenha(pixRequest.senha());
-		validarValor(pixRequest.valor());
+		validarLimite(pixRequest.valor(), LIMITE_PIX, "PIX");
 		Conta conta = contaDoUsuarioAutenticado();
 		validarMovimentacaoDeSaida(conta);
 		Conta contaDestino = repConta.findByChavePix(pixRequest.chavePix())
@@ -110,7 +115,7 @@ public class ServicoTransacoes {
 	@Transactional
 	public TransacaoResponseDto saque(SaqueRequestDto saqueRequest) {
 		validarSenha(saqueRequest.senha());
-		validarValor(saqueRequest.valor());
+		validarLimite(saqueRequest.valor(), LIMITE_SAQUE, "SAQUE");
 		Conta conta = contaDoUsuarioAutenticado();
 		validarMovimentacaoDeSaida(conta);
 
@@ -126,12 +131,10 @@ public class ServicoTransacoes {
 
 	@Transactional
 	public TransacaoResponseDto deposito(DepositoRequestDto depositoRequest) {
-		System.out.println("depsoito: "+depositoRequest);
 		validarSenha(depositoRequest.senha());
-		validarValor(depositoRequest.valor());
+		validarLimite(depositoRequest.valor(), LIMITE_DEPOSITO, "DEPÓSITO");
 		Conta contaDeposito = contaDoUsuarioAutenticado();
 
-		System.out.println("depsoito: "+depositoRequest);
 		BigDecimal saldoAtual = contaDeposito.getSaldo();
 		depositar(contaDeposito, depositoRequest.valor());
 
@@ -143,19 +146,19 @@ public class ServicoTransacoes {
 	}
 
 	// MÉTODOS INTERNOS
-	private void validarValor(BigDecimal valor) {
-		if (valor.compareTo(BigDecimal.ZERO) <= 0) {
-			throw new ValorInvalidoException("o valor deve ser maior que zero!");
+	private void validarLimite(BigDecimal valor, BigDecimal limite, String operacao) {
+		if (valor.compareTo(limite) > 0) {
+			throw new ValorInvalidoException(operacao + " excede o limite permitido!");
 		}
 	}
 
 	private void depositar(Conta conta, BigDecimal valor) {
 		if (conta.getStatus() == StatusDaConta.ENCERRADA) {
-			throw new ContaEncerradaException("indisponível, a conta ID:"+conta.getId()+" está " + conta.getStatus());
+			throw new ContaEncerradaException(
+					"indisponível, a conta ID:" + conta.getId() + " está " + conta.getStatus());
 		}
 		BigDecimal saldoatual = conta.getSaldo();
-		BigDecimal saldoPosDeposito = saldoatual.add(valor);
-		conta.setSaldo(saldoPosDeposito);
+		conta.setSaldo(saldoatual.add(valor));
 	}
 
 	private void sacar(Conta conta, BigDecimal valor) {
@@ -163,8 +166,7 @@ public class ServicoTransacoes {
 		if (saldoAtual.compareTo(valor) < 0) {
 			throw new SaldoInsuficienteException("saldo insuficiente!");
 		}
-		BigDecimal saldoPosSaque = saldoAtual.subtract(valor);
-		conta.setSaldo(saldoPosSaque);
+		conta.setSaldo(saldoAtual.subtract(valor));
 	}
 
 	private Transacao realizarTransacao(TipoTransacao tipo, Conta contaDestino, Conta contaOrigem, BigDecimal valor,

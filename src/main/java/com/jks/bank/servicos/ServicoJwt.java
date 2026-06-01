@@ -16,7 +16,7 @@ import com.jks.bank.entidades.Usuario;
 @Service
 public class ServicoJwt {
 	private Algorithm algorithm;
-	
+
 	public ServicoJwt(@Value("${api.security.token.secret}") String CHAVE_SECRETA) {
 		this.algorithm = Algorithm.HMAC256(CHAVE_SECRETA);
 	}
@@ -53,7 +53,8 @@ public class ServicoJwt {
 
 	public boolean validarRefreshToken(String token, Usuario usuario) {
 		try {
-			JWT.require(algorithm).withIssuer("BancoDigitalAPI").withSubject(usuario.getUsername()).build().verify(token);
+			JWT.require(algorithm).withIssuer("BancoDigitalAPI").withSubject(usuario.getUsername()).build()
+					.verify(token);
 			return true;
 		} catch (JWTVerificationException e) {
 			return false;

@@ -44,7 +44,7 @@ public class Usuario implements UserDetails {
 	@Column(nullable = false)
 	private LocalDate dataNasc;
 
-	@Column(name = "conta_bloqueada" ,nullable = false)
+	@Column(name = "conta_bloqueada", nullable = false)
 	private boolean contaBloqueada = false;
 
 	@OneToOne(fetch = FetchType.LAZY, mappedBy = "usuario", cascade = CascadeType.ALL)

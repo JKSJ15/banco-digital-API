@@ -14,6 +14,6 @@ public interface RepositorioTransacao extends JpaRepository<Transacao, Long> {
 	Optional<Transacao> findByTipo(TipoTransacao tipoTransacao);
 
 	Optional<Transacao> findByData(LocalDateTime dataTransacao);
-	
+
 	Page<Transacao> findByContaOrigemIdOrContaDestinoId(Long id, Long id1, Pageable pageable);
 }

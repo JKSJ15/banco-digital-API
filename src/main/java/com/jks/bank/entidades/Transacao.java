@@ -67,7 +67,6 @@ public class Transacao {
 	public Long getId() {
 		return id;
 	}
-	
 
 	public BigDecimal getSaldoAnterior() {
 		return saldoAnterior;

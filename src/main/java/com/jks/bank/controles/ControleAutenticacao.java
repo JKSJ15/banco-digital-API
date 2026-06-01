@@ -12,6 +12,8 @@ import com.jks.bank.dto.RegistroRequestDto;
 import com.jks.bank.dto.TokensResponse;
 import com.jks.bank.servicos.ServicoAutenticacao;
 
+import jakarta.validation.Valid;
+
 @RestController
 @RequestMapping("/auth")
 public class ControleAutenticacao {
@@ -23,18 +25,18 @@ public class ControleAutenticacao {
 	}
 
 	@PostMapping("/login")
-	public ResponseEntity<TokensResponse> login(@RequestBody LoginRequestDto request) {
+	public ResponseEntity<TokensResponse> login(@RequestBody @Valid LoginRequestDto request) {
 		return ResponseEntity.ok(servicoAutenticacao.login(request));
 	}
 
 	@PostMapping("/registro")
-	public ResponseEntity<Void> registro(@RequestBody RegistroRequestDto request) {
+	public ResponseEntity<Void> registro(@RequestBody @Valid RegistroRequestDto request) {
 		servicoAutenticacao.registro(request);
 		return ResponseEntity.noContent().build();
 	}
 
 	@PostMapping("/refresh")
-	public ResponseEntity<TokensResponse> refresh(@RequestBody RefreshRequestDto request) {
+	public ResponseEntity<TokensResponse> refresh(@RequestBody @Valid RefreshRequestDto request) {
 		return ResponseEntity.ok(servicoAutenticacao.refresh(request));
 	}
 }

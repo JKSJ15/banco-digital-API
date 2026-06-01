@@ -111,7 +111,8 @@ public class GerenciadorGlobalExceptions {
 
 	@ExceptionHandler(MethodArgumentNotValidException.class)
 	public ResponseEntity<CorpoException> usaMethodArgumentNotValidException(MethodArgumentNotValidException e) {
-		CorpoException corpo = new CorpoException(e.getMessage(), LocalDateTime.now(), HttpStatus.BAD_REQUEST,
+		String mensagem = e.getBindingResult().getFieldError().getDefaultMessage();
+		CorpoException corpo = new CorpoException(mensagem, LocalDateTime.now(), HttpStatus.BAD_REQUEST,
 				HttpStatus.BAD_REQUEST.value());
 		return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(corpo);
 	}
