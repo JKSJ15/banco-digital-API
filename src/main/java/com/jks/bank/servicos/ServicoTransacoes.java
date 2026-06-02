@@ -1,6 +1,7 @@
 package com.jks.bank.servicos;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 import org.springframework.data.domain.Page;
@@ -11,6 +12,7 @@ import org.springframework.stereotype.Service;
 
 import com.jks.bank.dto.DepositoRequestDto;
 import com.jks.bank.dto.PixRequestDto;
+import com.jks.bank.dto.RelatorioDto;
 import com.jks.bank.dto.SaqueRequestDto;
 import com.jks.bank.dto.TransacaoResponseDto;
 import com.jks.bank.dto.TransferenciaRequestDto;
@@ -43,6 +45,7 @@ public class ServicoTransacoes {
 	private static final BigDecimal LIMITE_TRANSFERENCIA = BigDecimal.valueOf(10000);
 	private static final BigDecimal LIMITE_SAQUE = BigDecimal.valueOf(5000);
 	private static final BigDecimal LIMITE_PIX = BigDecimal.valueOf(10000);
+	private static final BigDecimal LIMITE_PIX_DIARIO = BigDecimal.valueOf(20000);
 	private static final BigDecimal LIMITE_DEPOSITO = BigDecimal.valueOf(50000);
 
 	public ServicoTransacoes(RepositorioConta repConta, RepositorioTransacao repTransacao,
@@ -54,18 +57,40 @@ public class ServicoTransacoes {
 		this.passwordEncoder = passwordEncoder;
 	}
 
-	public Page<TransacaoResponseDto> extrato(Pageable pageable) {
+	public Page<TransacaoResponseDto> extrato(Pageable pageable, LocalDate inicio, LocalDate fim) {
 		Conta conta = contaDoUsuarioAutenticado();
-		Page<Transacao> transacoes = repTransacao.findByContaOrigemIdOrContaDestinoId(conta.getId(), conta.getId(),
-				pageable);
+		if (inicio != null && fim != null) {
+			if (fim.isBefore(inicio)) {
+				throw new ValorInvalidoException("a data inicial não pode ser posterior à data final!");
+			}
+			return repTransacao
+					.buscarExtratoPorPeriodo(conta.getId(), inicio.atStartOfDay(), fim.atTime(23, 59, 59), pageable)
+					.map(MapeamentoDeTransacao::transacaoParaDto);
+		}
+		return repTransacao.findByContaOrigemIdOrContaDestinoId(conta.getId(), conta.getId(), pageable)
+				.map(MapeamentoDeTransacao::transacaoParaDto);
+	}
 
-		return transacoes.map(MapeamentoDeTransacao::transacaoParaDto);
+	public RelatorioDto relatorioMensal() {
+		Conta conta = contaDoUsuarioAutenticado();
+
+		LocalDate hoje = LocalDate.now();
+		LocalDateTime inicioMes = hoje.withDayOfMonth(1).atStartOfDay();
+		LocalDateTime fimMes = hoje.withDayOfMonth(hoje.lengthOfMonth()).atTime(23, 59, 59);
+
+		BigDecimal recebido = repTransacao.totalRecebidoMes(conta.getId(), inicioMes, fimMes);
+		BigDecimal enviado = repTransacao.totalEnviadoMes(conta.getId(), inicioMes, fimMes);
+		Long pix = repTransacao.quantidadePixMes(TipoTransacao.PIX, conta.getId(), inicioMes, fimMes);
+
+		BigDecimal movimentado = recebido.subtract(enviado);
+
+		return new RelatorioDto(conta.getSaldo(), recebido, enviado, pix, movimentado);
 	}
 
 	@Transactional
 	public TransacaoResponseDto transferencia(TransferenciaRequestDto transferenciaRequest) {
 		validarSenha(transferenciaRequest.senha());
-		validarLimite(transferenciaRequest.valor(), LIMITE_TRANSFERENCIA, "TRANSFERENCIA");
+		validarLimite(transferenciaRequest.valor(), LIMITE_TRANSFERENCIA, "Tranferência");
 		Conta conta = contaDoUsuarioAutenticado();
 		validarMovimentacaoDeSaida(conta);
 		Conta contaDestino = repConta.findById(transferenciaRequest.idContaDestino())
@@ -92,6 +117,7 @@ public class ServicoTransacoes {
 		validarSenha(pixRequest.senha());
 		validarLimite(pixRequest.valor(), LIMITE_PIX, "PIX");
 		Conta conta = contaDoUsuarioAutenticado();
+		validarLimitePixDiario(conta, pixRequest.valor());
 		validarMovimentacaoDeSaida(conta);
 		Conta contaDestino = repConta.findByChavePix(pixRequest.chavePix())
 				.orElseThrow(() -> new ContaNaoEncontradaException("conta destino não encontrada!"));
@@ -115,7 +141,7 @@ public class ServicoTransacoes {
 	@Transactional
 	public TransacaoResponseDto saque(SaqueRequestDto saqueRequest) {
 		validarSenha(saqueRequest.senha());
-		validarLimite(saqueRequest.valor(), LIMITE_SAQUE, "SAQUE");
+		validarLimite(saqueRequest.valor(), LIMITE_SAQUE, "Saque");
 		Conta conta = contaDoUsuarioAutenticado();
 		validarMovimentacaoDeSaida(conta);
 
@@ -132,7 +158,7 @@ public class ServicoTransacoes {
 	@Transactional
 	public TransacaoResponseDto deposito(DepositoRequestDto depositoRequest) {
 		validarSenha(depositoRequest.senha());
-		validarLimite(depositoRequest.valor(), LIMITE_DEPOSITO, "DEPÓSITO");
+		validarLimite(depositoRequest.valor(), LIMITE_DEPOSITO, "Depósito");
 		Conta contaDeposito = contaDoUsuarioAutenticado();
 
 		BigDecimal saldoAtual = contaDeposito.getSaldo();
@@ -146,6 +172,19 @@ public class ServicoTransacoes {
 	}
 
 	// MÉTODOS INTERNOS
+	private void validarLimitePixDiario(Conta conta, BigDecimal valorRequest) {
+		LocalDate hoje = LocalDate.now();
+		BigDecimal soma = repTransacao.somarValoresPorPeriodo(TipoTransacao.PIX, conta.getId(), hoje.atStartOfDay(),
+				hoje.atTime(23, 59, 59));
+
+		if (soma == null) {
+			soma = BigDecimal.ZERO;
+		}
+		if (soma.add(valorRequest).compareTo(LIMITE_PIX_DIARIO) > 0) {
+			throw new ValorInvalidoException("limite diário de PIX excedido!");
+		}
+	}
+
 	private void validarLimite(BigDecimal valor, BigDecimal limite, String operacao) {
 		if (valor.compareTo(limite) > 0) {
 			throw new ValorInvalidoException(operacao + " excede o limite permitido!");
@@ -181,9 +220,7 @@ public class ServicoTransacoes {
 
 	private Conta contaDoUsuarioAutenticado() {
 		String login = SecurityContextHolder.getContext().getAuthentication().getName();
-		Usuario usuario = repUsuario.findByLogin(login)
-				.orElseThrow(() -> new UsuarioNaoEncontradoException("usuario não encontado!"));
-		Conta conta = repConta.findByUsuarioId(usuario.getId())
+		Conta conta = repConta.findByUsuarioLogin(login)
 				.orElseThrow(() -> new ContaNaoEncontradaException("Conta não encontrada!"));
 		return conta;
 	}
