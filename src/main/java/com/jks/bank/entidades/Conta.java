@@ -49,12 +49,14 @@ public class Conta implements Serializable {
 	@Column(nullable = false)
 	private LocalDate dataDaCriacao;
 
+	@Column(nullable = false)
+	private String Cep;
+
 	@JoinColumn(name = "id_usuario", nullable = false)
 	@OneToOne
 	private Usuario usuario;
 
 	private Conta(Builder builder) {
-		this.version = builder.version;
 		this.id = builder.id;
 		this.agencia = builder.agencia;
 		this.numero = builder.numero;
@@ -62,6 +64,7 @@ public class Conta implements Serializable {
 		this.saldo = builder.saldo;
 		this.status = builder.status;
 		this.dataDaCriacao = builder.dataDaCriacao;
+		this.Cep = builder.Cep;
 		this.usuario = builder.usuario;
 	}
 
@@ -81,6 +84,14 @@ public class Conta implements Serializable {
 	public void encerrarConta() {
 		usuario.setContaBloqueada(true);
 		status = StatusDaConta.ENCERRADA;
+	}
+
+	public String getCep() {
+		return Cep;
+	}
+
+	public void setCep(String cep) {
+		Cep = cep;
 	}
 
 	public LocalDate getDataDaCriacao() {
@@ -160,7 +171,6 @@ public class Conta implements Serializable {
 	}
 
 	public static final class Builder {
-		private Long version;
 		private Long id;
 		private String agencia;
 		private String numero;
@@ -168,14 +178,10 @@ public class Conta implements Serializable {
 		private BigDecimal saldo;
 		private StatusDaConta status;
 		private LocalDate dataDaCriacao;
+		private String Cep;
 		private Usuario usuario;
 
 		private Builder() {
-		}
-
-		public Builder withVersion(Long version) {
-			this.version = version;
-			return this;
 		}
 
 		public Builder withId(Long id) {
@@ -210,6 +216,11 @@ public class Conta implements Serializable {
 
 		public Builder withDataDaCriacao(LocalDate dataDaCriacao) {
 			this.dataDaCriacao = dataDaCriacao;
+			return this;
+		}
+
+		public Builder withCep(String Cep) {
+			this.Cep = Cep;
 			return this;
 		}
 

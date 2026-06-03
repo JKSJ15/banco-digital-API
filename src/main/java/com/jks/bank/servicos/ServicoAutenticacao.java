@@ -12,6 +12,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import com.jks.bank.dto.CepResponseDto;
 import com.jks.bank.dto.LoginRequestDto;
 import com.jks.bank.dto.RefreshRequestDto;
 import com.jks.bank.dto.RegistroRequestDto;
@@ -20,6 +21,7 @@ import com.jks.bank.entidades.Conta;
 import com.jks.bank.entidades.RefreshToken;
 import com.jks.bank.entidades.StatusDaConta;
 import com.jks.bank.entidades.Usuario;
+import com.jks.bank.exceptions.CepInvalidoException;
 import com.jks.bank.exceptions.IdadeNaoPermitidaException;
 import com.jks.bank.exceptions.RefreshTokenInvalidoException;
 import com.jks.bank.exceptions.UsuarioJaExisteException;
@@ -31,6 +33,7 @@ import com.jks.bank.repositorios.RepositorioUsuario;
 
 @Service
 public class ServicoAutenticacao {
+	private final ServicoApiCep servicoCep;
 	private final PasswordEncoder passwordEncoder;
 	private final RepositorioUsuario repositorioUsuario;
 	private final RepositorioConta repositorioConta;
@@ -39,10 +42,12 @@ public class ServicoAutenticacao {
 	private final RepositorioRefreshToken repositorioRefreshToken;
 	private final AuthenticationManager gerenciadorAutenticacao;
 
-	public ServicoAutenticacao(PasswordEncoder passwordEncoder, RepositorioUsuario repositorioUsuario,
-			RepositorioConta repositorioConta, ServicoJwt servicoJwt, ServicoRefreshToken servicoRefreshToken,
-			RepositorioRefreshToken repositorioRefreshToken, AuthenticationManager gerenciadorAutenticacao) {
+	public ServicoAutenticacao(ServicoApiCep servicoCep, PasswordEncoder passwordEncoder,
+			RepositorioUsuario repositorioUsuario, RepositorioConta repositorioConta, ServicoJwt servicoJwt,
+			ServicoRefreshToken servicoRefreshToken, RepositorioRefreshToken repositorioRefreshToken,
+			AuthenticationManager gerenciadorAutenticacao) {
 		super();
+		this.servicoCep = servicoCep;
 		this.passwordEncoder = passwordEncoder;
 		this.repositorioUsuario = repositorioUsuario;
 		this.repositorioConta = repositorioConta;
@@ -68,8 +73,9 @@ public class ServicoAutenticacao {
 
 	public void registro(RegistroRequestDto request) {
 		validarRequestRegistro(request);
+		validarCep(request.cep());
 
-		Conta conta = gerarConta();
+		Conta conta = gerarConta(request);
 
 		String senhaCriptografada = passwordEncoder.encode(request.senha());
 		Usuario usuario = Usuario.builder().withCpf(request.cpf()).withDataNasc(request.dataNascimento())
@@ -101,6 +107,15 @@ public class ServicoAutenticacao {
 	}
 
 	// MÉTODOS INTERNOS
+
+	private void validarCep(String cep) {
+		CepResponseDto endereco = servicoCep.buscarEndereco(cep);
+
+		if (endereco == null || Boolean.TRUE.equals(endereco.erro())) {
+			throw new CepInvalidoException("cep inválido!");
+		}
+	}
+
 	private void validarRequestRegistro(RegistroRequestDto request) {
 		if (request.dataNascimento() == null) {
 			throw new ValorInvalidoException("data de nascimento é obrigatória");
@@ -114,8 +129,8 @@ public class ServicoAutenticacao {
 		}
 	}
 
-	private Conta gerarConta() {
-		return Conta.builder().withDataDaCriacao(LocalDate.now()).withSaldo(BigDecimal.ZERO)
+	private Conta gerarConta(RegistroRequestDto request) {
+		return Conta.builder().withDataDaCriacao(LocalDate.now()).withSaldo(BigDecimal.ZERO).withCep(request.cep())
 				.withStatus(StatusDaConta.ATIVA).withAgencia("001").withChavePix(UUID.randomUUID().toString())
 				.withNumero(String.valueOf(ThreadLocalRandom.current().nextInt(100000, 999999))).build();
 	}

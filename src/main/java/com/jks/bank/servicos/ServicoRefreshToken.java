@@ -41,4 +41,8 @@ public class ServicoRefreshToken {
 			throw new RefreshTokenInvalidoException("refresh token inválido!");
 		}
 	}
+	
+	public void deletarPeloUsuario(Usuario usuario) {
+		repositorioRefreshToken.deleteByUsuario(usuario);
+	}
 }

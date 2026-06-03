@@ -8,6 +8,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+import com.jks.bank.exceptions.CepInvalidoException;
 import com.jks.bank.exceptions.ContaBloqueadaException;
 import com.jks.bank.exceptions.ContaComDinheiroException;
 import com.jks.bank.exceptions.ContaEncerradaException;
@@ -104,6 +105,13 @@ public class GerenciadorGlobalExceptions {
 
 	@ExceptionHandler(value = SenhaInvalidaException.class)
 	public ResponseEntity<CorpoException> usaSenhaInvalidaException(SenhaInvalidaException e) {
+		CorpoException corpo = new CorpoException(e.getMessage(), LocalDateTime.now(), HttpStatus.BAD_REQUEST,
+				HttpStatus.BAD_REQUEST.value());
+		return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(corpo);
+	}
+
+	@ExceptionHandler(value = CepInvalidoException.class)
+	public ResponseEntity<CorpoException> usaCepInvalidoException(CepInvalidoException e) {
 		CorpoException corpo = new CorpoException(e.getMessage(), LocalDateTime.now(), HttpStatus.BAD_REQUEST,
 				HttpStatus.BAD_REQUEST.value());
 		return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(corpo);

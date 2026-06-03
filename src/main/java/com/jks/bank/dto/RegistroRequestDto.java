@@ -10,5 +10,6 @@ public record RegistroRequestDto(@NotBlank(message = "nome não pode ser nulo!")
 		@NotBlank(message = "login não pode ser nulo!") String login,
 		@NotBlank(message = "senha inválida!") String senha,
 		@NotNull(message = "data de nascimento não pode ser nula!") LocalDate dataNascimento,
-		@NotBlank(message = "telefone não pode ser nulo!") String telefone) {
+		@NotBlank(message = "telefone não pode ser nulo!") String telefone,
+		@NotBlank(message = "cep não pode ser nulo!") String cep) {
 }
