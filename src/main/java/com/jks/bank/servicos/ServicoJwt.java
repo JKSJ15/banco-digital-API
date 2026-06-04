@@ -4,6 +4,8 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -15,6 +17,7 @@ import com.jks.bank.entidades.Usuario;
 
 @Service
 public class ServicoJwt {
+	private static final Logger log = LoggerFactory.getLogger(ServicoJwt.class);
 	private Algorithm algorithm;
 
 	public ServicoJwt(@Value("${api.security.token.secret}") String CHAVE_SECRETA) {
@@ -24,9 +27,11 @@ public class ServicoJwt {
 	// TOKEN ACESSO
 	public String criarTokenDeAcesso(Usuario usuario) {
 		try {
+			log.debug("criando token de acesso para usuário {}", usuario.getUsername());
 			return JWT.create().withExpiresAt(criarTempoDeExpiracaoTokenAcesso()).withIssuer("BancoDigitalAPI")
 					.withSubject(usuario.getUsername()).sign(algorithm);
 		} catch (JWTCreationException e) {
+			log.error("erro ao gerar token de acesso", e);
 			return null;
 		}
 
@@ -37,6 +42,7 @@ public class ServicoJwt {
 			String login = JWT.require(algorithm).withIssuer("BancoDigitalAPI").build().verify(token).getSubject();
 			return login;
 		} catch (JWTVerificationException e) {
+			log.warn("token de acesso inválido: {}", e.getMessage());
 			return null;
 		}
 	}
@@ -44,19 +50,23 @@ public class ServicoJwt {
 	// REFRESH TOKEN
 	public String criarRefreshToken(Usuario usuario) {
 		try {
+			log.debug("criando refresh token para usuário {}", usuario.getUsername());
 			return JWT.create().withExpiresAt(Date.from(criarTempoDeExpiracaoRefreshToken()))
 					.withIssuer("BancoDigitalAPI").withSubject(usuario.getUsername()).sign(algorithm);
 		} catch (JWTCreationException e) {
+			log.error("erro ao gerar refresh token", e);
 			throw new RuntimeException("erro na geração do token");
 		}
 	}
 
 	public boolean validarRefreshToken(String token, Usuario usuario) {
 		try {
+			log.debug("validando refresh token para usuário {}", usuario.getUsername());
 			JWT.require(algorithm).withIssuer("BancoDigitalAPI").withSubject(usuario.getUsername()).build()
 					.verify(token);
 			return true;
 		} catch (JWTVerificationException e) {
+			log.warn("erro ao validar refresh token: {}",e.getMessage());
 			return false;
 		}
 	}

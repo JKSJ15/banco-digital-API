@@ -3,6 +3,8 @@ package com.jks.bank.servicos;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.jks.bank.entidades.RefreshToken;
@@ -12,6 +14,7 @@ import com.jks.bank.repositorios.RepositorioRefreshToken;
 
 @Service
 public class ServicoRefreshToken {
+	private static final Logger log = LoggerFactory.getLogger(ServicoRefreshToken.class);
 	private final RepositorioRefreshToken repositorioRefreshToken;
 	private final ServicoJwt jwtService;
 
@@ -22,6 +25,7 @@ public class ServicoRefreshToken {
 	}
 
 	public RefreshToken gerarEntidadeRefreshToken(String refreshToken, Usuario usuario) {
+		log.debug("criando entidade refresh token para usuário {}", usuario.getUsername());
 		jwtService.validarRefreshToken(refreshToken, usuario);
 		RefreshToken refresh = RefreshToken.builder().withToken(refreshToken).withUsuario(usuario)
 				.withExpiraEm(Instant.now().plus(3, ChronoUnit.DAYS)).build();
@@ -30,19 +34,26 @@ public class ServicoRefreshToken {
 	}
 
 	public RefreshToken encontrarEntidadeRefreshToken(String refreshToken) {
-		return repositorioRefreshToken.findByToken(refreshToken)
-				.orElseThrow(() -> new RefreshTokenInvalidoException("refresh token inválido!"));
+		return repositorioRefreshToken.findByToken(refreshToken).orElseThrow(() -> {
+			log.warn("refresh token não encontrado");
+			return new RefreshTokenInvalidoException("refresh token inválido!");
+		});
 	}
 
 	public void validarEntidadeRefreshToken(String refreshToken) {
-		RefreshToken refresh = repositorioRefreshToken.findByToken(refreshToken)
-				.orElseThrow(() -> new RefreshTokenInvalidoException("refresh token inválido!"));
+		log.debug("validando entidade refresh token ");
+		RefreshToken refresh = repositorioRefreshToken.findByToken(refreshToken).orElseThrow(() -> {
+			log.warn("refresh token não encontrado");
+			return new RefreshTokenInvalidoException("refresh token inválido!");
+		});
 		if (refresh.tokenEstaExpirado()) {
+			log.warn("refresh token expirado para usuário {}", refresh.getUsuario().getUsername());
 			throw new RefreshTokenInvalidoException("refresh token inválido!");
 		}
 	}
-	
+
 	public void deletarPeloUsuario(Usuario usuario) {
+		log.debug("removendo refresh tokens do usuário {}", usuario.getUsername());
 		repositorioRefreshToken.deleteByUsuario(usuario);
 	}
 }

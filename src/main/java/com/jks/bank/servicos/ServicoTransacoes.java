@@ -4,6 +4,8 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -38,6 +40,7 @@ import jakarta.transaction.Transactional;
 
 @Service
 public class ServicoTransacoes {
+	private static final Logger log = LoggerFactory.getLogger(ServicoTransacoes.class);
 	private final RepositorioConta repConta;
 	private final RepositorioTransacao repTransacao;
 	private final RepositorioUsuario repUsuario;
@@ -59,20 +62,27 @@ public class ServicoTransacoes {
 
 	public Page<TransacaoResponseDto> extrato(Pageable pageable, LocalDate inicio, LocalDate fim) {
 		Conta conta = contaDoUsuarioAutenticado();
+		log.info("extrato requisitado para conta {}, pelo usuário {}. filtros: inicio {}, fim {}", conta.getId(),
+				conta.getUsuario().getUsername(), inicio, fim);
 		if (inicio != null && fim != null) {
 			if (fim.isBefore(inicio)) {
+				log.warn("data fim está antes de inicio!");
 				throw new ValorInvalidoException("a data inicial não pode ser posterior à data final!");
 			}
+			log.info("extrato retornado com sucesso para conta {}", conta.getId());
 			return repTransacao
 					.buscarExtratoPorPeriodo(conta.getId(), inicio.atStartOfDay(), fim.atTime(23, 59, 59), pageable)
 					.map(MapeamentoDeTransacao::transacaoParaDto);
 		}
+		log.info("extrato retornado com sucesso para conta {}", conta.getId());
 		return repTransacao.findByContaOrigemIdOrContaDestinoId(conta.getId(), conta.getId(), pageable)
 				.map(MapeamentoDeTransacao::transacaoParaDto);
 	}
 
 	public RelatorioDto relatorioMensal() {
 		Conta conta = contaDoUsuarioAutenticado();
+		log.info("relatório mensal requisitado! conta: {}, usuário: {} ", conta.getId(),
+				conta.getUsuario().getUsername());
 
 		LocalDate hoje = LocalDate.now();
 		LocalDateTime inicioMes = hoje.withDayOfMonth(1).atStartOfDay();
@@ -84,11 +94,13 @@ public class ServicoTransacoes {
 
 		BigDecimal movimentado = recebido.subtract(enviado);
 
+		log.info("relatório mensal gerado para conta {}", conta.getId());
 		return new RelatorioDto(conta.getSaldo(), recebido, enviado, pix, movimentado);
 	}
 
 	@Transactional
 	public TransacaoResponseDto transferencia(TransferenciaRequestDto transferenciaRequest) {
+		log.info("transferencia requisitada");
 		validarSenha(transferenciaRequest.senha());
 		validarLimite(transferenciaRequest.valor(), LIMITE_TRANSFERENCIA, "Tranferência");
 		Conta conta = contaDoUsuarioAutenticado();
@@ -97,6 +109,8 @@ public class ServicoTransacoes {
 				.orElseThrow(() -> new ContaNaoEncontradaException("conta destino não encontrada!"));
 
 		if (conta.getId().equals(contaDestino.getId())) {
+			log.warn("transferência inválida! contaOrigem:{}, contaDestino:{}, valor:{}", conta.getId(),
+					contaDestino.getId(), transferenciaRequest.valor());
 			throw new TransferenciaInvalidaException("transferência inválida!");
 		}
 
@@ -109,11 +123,14 @@ public class ServicoTransacoes {
 
 		repConta.save(conta);
 		repConta.save(contaDestino);
+		log.info("transferência realizada! contaOrigem:{}, contaDestino:{}, valor:{}", conta.getId(), contaDestino.getId(),
+				transferenciaRequest.valor());
 		return MapeamentoDeTransacao.transacaoParaDto(transacaoSalva);
 	}
 
 	@Transactional
 	public TransacaoResponseDto pix(PixRequestDto pixRequest) {
+		log.info("pix requisitado");
 		validarSenha(pixRequest.senha());
 		validarLimite(pixRequest.valor(), LIMITE_PIX, "PIX");
 		Conta conta = contaDoUsuarioAutenticado();
@@ -123,6 +140,8 @@ public class ServicoTransacoes {
 				.orElseThrow(() -> new ContaNaoEncontradaException("conta destino não encontrada!"));
 
 		if (conta.getChavePix().equals(contaDestino.getChavePix())) {
+			log.warn("pix inválido! contaOrigem:{}, contaDestino:{}, valor:{}", conta.getId(), contaDestino.getId(),
+					pixRequest.valor());
 			throw new TransferenciaInvalidaException("transferência inválida!");
 		}
 
@@ -135,11 +154,14 @@ public class ServicoTransacoes {
 
 		repConta.save(conta);
 		repConta.save(contaDestino);
+		log.info("pix realizado! contaOrigem:{}, contaDestino:{}, valor:{}", conta.getId(), contaDestino.getId(),
+				pixRequest.valor());
 		return MapeamentoDeTransacao.transacaoParaDto(transacaoSalva);
 	}
 
 	@Transactional
 	public TransacaoResponseDto saque(SaqueRequestDto saqueRequest) {
+		log.info("saque requisitado!");
 		validarSenha(saqueRequest.senha());
 		validarLimite(saqueRequest.valor(), LIMITE_SAQUE, "Saque");
 		Conta conta = contaDoUsuarioAutenticado();
@@ -152,11 +174,14 @@ public class ServicoTransacoes {
 				saqueRequest.descricao(), saldoatual, conta.getSaldo());
 
 		repConta.save(conta);
+		log.info("saque realizado! conta: {}, usuário: {}, valor: {}", conta.getId(), conta.getUsuario().getUsername(),
+				saqueRequest.valor());
 		return MapeamentoDeTransacao.transacaoParaDto(transacaoSalva);
 	}
 
 	@Transactional
 	public TransacaoResponseDto deposito(DepositoRequestDto depositoRequest) {
+		log.info("depósito requisitado!");
 		validarSenha(depositoRequest.senha());
 		validarLimite(depositoRequest.valor(), LIMITE_DEPOSITO, "Depósito");
 		Conta contaDeposito = contaDoUsuarioAutenticado();
@@ -168,6 +193,8 @@ public class ServicoTransacoes {
 				depositoRequest.valor(), depositoRequest.descricao(), saldoAtual, contaDeposito.getSaldo());
 
 		repConta.save(contaDeposito);
+		log.info("depósito realizado!  conta: {}, usuário: {}, valor: {}", contaDeposito.getId(),
+				contaDeposito.getUsuario().getUsername(), depositoRequest.valor());
 		return MapeamentoDeTransacao.transacaoParaDto(transacaoSalva);
 	}
 
@@ -181,18 +208,22 @@ public class ServicoTransacoes {
 			soma = BigDecimal.ZERO;
 		}
 		if (soma.add(valorRequest).compareTo(LIMITE_PIX_DIARIO) > 0) {
+			log.warn("limite de pix diários da conta {} excedido! limite: {}, realizados: {}", conta.getId(),
+					LIMITE_PIX_DIARIO, soma);
 			throw new ValorInvalidoException("limite diário de PIX excedido!");
 		}
 	}
 
 	private void validarLimite(BigDecimal valor, BigDecimal limite, String operacao) {
 		if (valor.compareTo(limite) > 0) {
+			log.warn("operacao {} excede o limite. valor={}, limite={}", operacao, valor, limite);
 			throw new ValorInvalidoException(operacao + " excede o limite permitido!");
 		}
 	}
 
 	private void depositar(Conta conta, BigDecimal valor) {
 		if (conta.getStatus() == StatusDaConta.ENCERRADA) {
+			log.warn("conta {} está encerrada!", conta.getId());
 			throw new ContaEncerradaException(
 					"indisponível, a conta ID:" + conta.getId() + " está " + conta.getStatus());
 		}
@@ -203,6 +234,7 @@ public class ServicoTransacoes {
 	private void sacar(Conta conta, BigDecimal valor) {
 		BigDecimal saldoAtual = conta.getSaldo();
 		if (saldoAtual.compareTo(valor) < 0) {
+			log.warn("saldo da conta {} insuficiente para o saque de {}", conta.getId(), valor);
 			throw new SaldoInsuficienteException("saldo insuficiente!");
 		}
 		conta.setSaldo(saldoAtual.subtract(valor));
@@ -220,13 +252,16 @@ public class ServicoTransacoes {
 
 	private Conta contaDoUsuarioAutenticado() {
 		String login = SecurityContextHolder.getContext().getAuthentication().getName();
+		log.debug("buscando conta do usuário {}", login);
 		Conta conta = repConta.findByUsuarioLogin(login)
 				.orElseThrow(() -> new ContaNaoEncontradaException("Conta não encontrada!"));
+		log.debug("conta {} encontrada!", conta.getId());
 		return conta;
 	}
 
 	private void validarMovimentacaoDeSaida(Conta conta) {
 		if (conta.getStatus() == StatusDaConta.BLOQUEADA || conta.getStatus() == StatusDaConta.ENCERRADA) {
+			log.warn("indisponível, a conta está {}", conta.getStatus());
 			throw new ContaBloqueadaException("indisponível, sua conta está " + conta.getStatus());
 		}
 	}
@@ -236,6 +271,7 @@ public class ServicoTransacoes {
 		Usuario usuario = repUsuario.findByLogin(login)
 				.orElseThrow(() -> new UsuarioNaoEncontradoException("usuario não encontado!"));
 		if (!passwordEncoder.matches(senha, usuario.getPassword())) {
+			log.warn("senha do usuário {} incorreta!", login);
 			throw new SenhaInvalidaException("senha inválida!");
 		}
 	}

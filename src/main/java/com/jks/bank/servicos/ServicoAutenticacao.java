@@ -7,6 +7,8 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -26,13 +28,13 @@ import com.jks.bank.exceptions.IdadeNaoPermitidaException;
 import com.jks.bank.exceptions.RefreshTokenInvalidoException;
 import com.jks.bank.exceptions.UsuarioJaExisteException;
 import com.jks.bank.exceptions.UsuarioNaoEncontradoException;
-import com.jks.bank.exceptions.ValorInvalidoException;
 import com.jks.bank.repositorios.RepositorioConta;
 import com.jks.bank.repositorios.RepositorioRefreshToken;
 import com.jks.bank.repositorios.RepositorioUsuario;
 
 @Service
 public class ServicoAutenticacao {
+	private static final Logger log = LoggerFactory.getLogger(ServicoAutenticacao.class);
 	private final ServicoApiCep servicoCep;
 	private final PasswordEncoder passwordEncoder;
 	private final RepositorioUsuario repositorioUsuario;
@@ -58,8 +60,10 @@ public class ServicoAutenticacao {
 	}
 
 	public TokensResponse login(LoginRequestDto request) {
+		log.debug("tentativa de login para usuário {}", request.login());
 		var auth = new UsernamePasswordAuthenticationToken(request.login(), request.senha());
 		gerenciadorAutenticacao.authenticate(auth);
+		log.info("login realizado! usuário: {}", request.login());
 
 		Usuario usuario = repositorioUsuario.findByLogin(request.login())
 				.orElseThrow(() -> new UsuarioNaoEncontradoException("usuário não encontrado!"));
@@ -72,6 +76,7 @@ public class ServicoAutenticacao {
 	}
 
 	public void registro(RegistroRequestDto request) {
+		log.debug("refresh token recebido para renovação");
 		validarRequestRegistro(request);
 		validarCep(request.cep());
 
@@ -85,9 +90,12 @@ public class ServicoAutenticacao {
 
 		repositorioUsuario.save(usuario);
 		repositorioConta.save(conta);
+		log.info("registro realizado! usuário:{}, conta:{}, agencia:{}, numero:{}", usuario.getUsername(),
+				conta.getId(), conta.getAgencia(), conta.getNumero());
 	}
 
 	public TokensResponse refresh(RefreshRequestDto request) {
+		log.info("refresh requisitado!");
 		servicoRefreshToken.validarEntidadeRefreshToken(request.refreshToken());
 		RefreshToken refresh = servicoRefreshToken.encontrarEntidadeRefreshToken(request.refreshToken());
 		servicoJwt.validarRefreshToken(request.refreshToken(), refresh.getUsuario());
@@ -103,6 +111,7 @@ public class ServicoAutenticacao {
 		servicoRefreshToken.gerarEntidadeRefreshToken(refreshToken, usuarioPortador);
 
 		TokensResponse tokensResponse = new TokensResponse(tokenAcesso, refreshToken);
+		log.info("refresh realizado! usuário: {}", usuarioPortador.getUsername());
 		return tokensResponse;
 	}
 
@@ -112,19 +121,19 @@ public class ServicoAutenticacao {
 		CepResponseDto endereco = servicoCep.buscarEndereco(cep);
 
 		if (endereco == null || Boolean.TRUE.equals(endereco.erro())) {
+			log.warn("cep {} inválido!", cep);
 			throw new CepInvalidoException("cep inválido!");
 		}
 	}
 
 	private void validarRequestRegistro(RegistroRequestDto request) {
-		if (request.dataNascimento() == null) {
-			throw new ValorInvalidoException("data de nascimento é obrigatória");
-		}
 		if (ChronoUnit.YEARS.between(request.dataNascimento(), LocalDate.now()) < 18) {
+			log.warn("usuário menor que 18 anos!");
 			throw new IdadeNaoPermitidaException("voce ainda não possui a idade necessária para criar uma conta!");
 		}
 		Optional<Usuario> usuario = repositorioUsuario.findByLogin(request.login());
 		if (usuario.isPresent()) {
+			log.warn("usuário: {}, já está cadastrado!", request.login());
 			throw new UsuarioJaExisteException("usuario já cadastrado!");
 		}
 	}
