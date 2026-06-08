@@ -14,10 +14,13 @@ import com.jks.bank.exceptions.ContaComDinheiroException;
 import com.jks.bank.exceptions.ContaEncerradaException;
 import com.jks.bank.exceptions.ContaNaoEncontradaException;
 import com.jks.bank.exceptions.CorpoException;
+import com.jks.bank.exceptions.CpfJaExisteException;
 import com.jks.bank.exceptions.IdadeNaoPermitidaException;
+import com.jks.bank.exceptions.NaoAutorizadoException;
 import com.jks.bank.exceptions.RefreshTokenInvalidoException;
 import com.jks.bank.exceptions.SaldoInsuficienteException;
 import com.jks.bank.exceptions.SenhaInvalidaException;
+import com.jks.bank.exceptions.TelefoneJaExisteException;
 import com.jks.bank.exceptions.TransferenciaInvalidaException;
 import com.jks.bank.exceptions.UsuarioJaExisteException;
 import com.jks.bank.exceptions.UsuarioNaoEncontradoException;
@@ -115,6 +118,27 @@ public class GerenciadorGlobalExceptions {
 		CorpoException corpo = new CorpoException(e.getMessage(), LocalDateTime.now(), HttpStatus.BAD_REQUEST,
 				HttpStatus.BAD_REQUEST.value());
 		return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(corpo);
+	}
+
+	@ExceptionHandler(value = CpfJaExisteException.class)
+	public ResponseEntity<CorpoException> usaCpfJaExisteException(CpfJaExisteException e) {
+		CorpoException corpo = new CorpoException(e.getMessage(), LocalDateTime.now(), HttpStatus.BAD_REQUEST,
+				HttpStatus.BAD_REQUEST.value());
+		return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(corpo);
+	}
+
+	@ExceptionHandler(value = TelefoneJaExisteException.class)
+	public ResponseEntity<CorpoException> usaTelefoneJaExisteException(TelefoneJaExisteException e) {
+		CorpoException corpo = new CorpoException(e.getMessage(), LocalDateTime.now(), HttpStatus.BAD_REQUEST,
+				HttpStatus.BAD_REQUEST.value());
+		return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(corpo);
+	}
+
+	@ExceptionHandler(value = NaoAutorizadoException.class)
+	public ResponseEntity<CorpoException> usaNaoAutorizadoException(NaoAutorizadoException e) {
+		CorpoException corpo = new CorpoException(e.getMessage(), LocalDateTime.now(), HttpStatus.UNAUTHORIZED,
+				HttpStatus.UNAUTHORIZED.value());
+		return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(corpo);
 	}
 
 	@ExceptionHandler(MethodArgumentNotValidException.class)

@@ -13,7 +13,7 @@ import com.jks.bank.dto.RefreshRequestDto;
 import com.jks.bank.dto.RegistroRequestDto;
 import com.jks.bank.dto.TokensResponse;
 import com.jks.bank.entidades.Usuario;
-import com.jks.bank.exceptions.UsuarioNaoEncontradoException;
+import com.jks.bank.exceptions.NaoAutorizadoException;
 import com.jks.bank.repositorios.RepositorioUsuario;
 import com.jks.bank.servicos.ServicoAutenticacao;
 import com.jks.bank.servicos.ServicoRefreshToken;
@@ -60,7 +60,6 @@ public class ControleAutenticacao {
 	// MÉTODOS INTERNOS
 	private Usuario usuarioAutenticado() {
 		String login = SecurityContextHolder.getContext().getAuthentication().getName();
-		return repUsuario.findByLogin(login)
-				.orElseThrow(() -> new UsuarioNaoEncontradoException("Usuário não encontrado"));
+		return repUsuario.findByLogin(login).orElseThrow(() -> new NaoAutorizadoException("usuário não autenticado!"));
 	}
 }

@@ -20,7 +20,7 @@ public class ServicoUsuario implements UserDetailsService {
 	@Override
 	public UserDetails loadUserByUsername(String username) throws UsuarioNaoEncontradoException {
 		Usuario usuario = repUsuario.findByLogin(username)
-				.orElseThrow(() -> new UsuarioNaoEncontradoException("usuário não encontrado!"));
+				.orElseThrow();
 		return usuario;
 	}
 

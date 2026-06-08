@@ -3,6 +3,7 @@ package com.jks.bank.servicos;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
+import java.util.UUID;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,7 +29,8 @@ public class ServicoJwt {
 	public String criarTokenDeAcesso(Usuario usuario) {
 		try {
 			log.debug("criando token de acesso para usuário {}", usuario.getUsername());
-			return JWT.create().withExpiresAt(criarTempoDeExpiracaoTokenAcesso()).withIssuer("BancoDigitalAPI")
+			return JWT.create().withJWTId(UUID.randomUUID().toString()).withIssuedAt(new Date())
+					.withExpiresAt(criarTempoDeExpiracaoTokenAcesso()).withIssuer("BancoDigitalAPI")
 					.withSubject(usuario.getUsername()).sign(algorithm);
 		} catch (JWTCreationException e) {
 			log.error("erro ao gerar token de acesso", e);
@@ -51,8 +53,9 @@ public class ServicoJwt {
 	public String criarRefreshToken(Usuario usuario) {
 		try {
 			log.debug("criando refresh token para usuário {}", usuario.getUsername());
-			return JWT.create().withExpiresAt(Date.from(criarTempoDeExpiracaoRefreshToken()))
-					.withIssuer("BancoDigitalAPI").withSubject(usuario.getUsername()).sign(algorithm);
+			return JWT.create().withJWTId(UUID.randomUUID().toString()).withIssuedAt(new Date())
+					.withExpiresAt(Date.from(criarTempoDeExpiracaoRefreshToken())).withIssuer("BancoDigitalAPI")
+					.withSubject(usuario.getUsername()).sign(algorithm);
 		} catch (JWTCreationException e) {
 			log.error("erro ao gerar refresh token", e);
 			throw new RuntimeException("erro na geração do token");
@@ -66,7 +69,7 @@ public class ServicoJwt {
 					.verify(token);
 			return true;
 		} catch (JWTVerificationException e) {
-			log.warn("erro ao validar refresh token: {}",e.getMessage());
+			log.warn("erro ao validar refresh token: {}", e.getMessage());
 			return false;
 		}
 	}

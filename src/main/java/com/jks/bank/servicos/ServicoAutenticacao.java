@@ -24,10 +24,12 @@ import com.jks.bank.entidades.RefreshToken;
 import com.jks.bank.entidades.StatusDaConta;
 import com.jks.bank.entidades.Usuario;
 import com.jks.bank.exceptions.CepInvalidoException;
+import com.jks.bank.exceptions.CpfJaExisteException;
 import com.jks.bank.exceptions.IdadeNaoPermitidaException;
+import com.jks.bank.exceptions.NaoAutorizadoException;
 import com.jks.bank.exceptions.RefreshTokenInvalidoException;
+import com.jks.bank.exceptions.TelefoneJaExisteException;
 import com.jks.bank.exceptions.UsuarioJaExisteException;
-import com.jks.bank.exceptions.UsuarioNaoEncontradoException;
 import com.jks.bank.repositorios.RepositorioConta;
 import com.jks.bank.repositorios.RepositorioRefreshToken;
 import com.jks.bank.repositorios.RepositorioUsuario;
@@ -66,7 +68,7 @@ public class ServicoAutenticacao {
 		log.info("login realizado! usuário: {}", request.login());
 
 		Usuario usuario = repositorioUsuario.findByLogin(request.login())
-				.orElseThrow(() -> new UsuarioNaoEncontradoException("usuário não encontrado!"));
+				.orElseThrow(() -> new NaoAutorizadoException("usuário não registrado!"));
 
 		String refreshToken = servicoJwt.criarRefreshToken(usuario);
 		String tokenAcesso = servicoJwt.criarTokenDeAcesso(usuario);
@@ -127,6 +129,12 @@ public class ServicoAutenticacao {
 	}
 
 	private void validarRequestRegistro(RegistroRequestDto request) {
+		if (repositorioUsuario.existsByCpf(request.cpf())) {
+			throw new CpfJaExisteException("cpf já cadastrado!");
+		}
+		if (repositorioUsuario.existsByTelefone(request.telefone())) {
+			throw new TelefoneJaExisteException("telefone já cadastrado!");
+		}
 		if (ChronoUnit.YEARS.between(request.dataNascimento(), LocalDate.now()) < 18) {
 			log.warn("usuário menor que 18 anos!");
 			throw new IdadeNaoPermitidaException("voce ainda não possui a idade necessária para criar uma conta!");

@@ -28,8 +28,8 @@ public class ConfigSecuranca {
 		return http.csrf(csrf -> csrf.disable())
 				.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 				.httpBasic(Customizer.withDefaults())
-				.authorizeHttpRequests(auth -> auth.requestMatchers(HttpMethod.POST, "/auth/**").permitAll()
-						.anyRequest().authenticated())
+				.authorizeHttpRequests(auth -> auth.requestMatchers(HttpMethod.POST, "/auth/login", "/auth/registro")
+						.permitAll().anyRequest().authenticated())
 				.addFilterBefore(filtro, UsernamePasswordAuthenticationFilter.class).build();
 	}
 
@@ -42,7 +42,7 @@ public class ConfigSecuranca {
 	PasswordEncoder passwordEncoder() {
 		return new BCryptPasswordEncoder();
 	}
-	
+
 	@Bean
 	RestClient restClint() {
 		return RestClient.builder().build();
