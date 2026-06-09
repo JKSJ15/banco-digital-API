@@ -85,7 +85,6 @@ public class TesteIntegracaoConta {
 				.andExpect(jsonPath("$.id").value(conta.getId()))
 				.andExpect(jsonPath("$.status").value(conta.getStatus().name()))
 				.andExpect(jsonPath("$.numero").value(conta.getNumero()));
-		;
 	}
 
 	@Test
