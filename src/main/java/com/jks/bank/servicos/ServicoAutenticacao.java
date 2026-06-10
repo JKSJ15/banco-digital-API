@@ -45,6 +45,9 @@ public class ServicoAutenticacao {
 	private final ServicoRefreshToken servicoRefreshToken;
 	private final RepositorioRefreshToken repositorioRefreshToken;
 	private final AuthenticationManager gerenciadorAutenticacao;
+	private static final String AMARELO = "\u001B[33m";
+	private static final String VERDE = "\u001B[32m";
+	private static final String RESETAR = "\u001B[0m";
 
 	public ServicoAutenticacao(ServicoApiCep servicoCep, PasswordEncoder passwordEncoder,
 			RepositorioUsuario repositorioUsuario, RepositorioConta repositorioConta, ServicoJwt servicoJwt,
@@ -65,7 +68,7 @@ public class ServicoAutenticacao {
 		log.debug("tentativa de login para usuário {}", request.login());
 		var auth = new UsernamePasswordAuthenticationToken(request.login(), request.senha());
 		gerenciadorAutenticacao.authenticate(auth);
-		log.info("login realizado! usuário: {}", request.login());
+		log.info(VERDE + "login realizado! usuário: {}" + RESETAR, request.login());
 
 		Usuario usuario = repositorioUsuario.findByLogin(request.login())
 				.orElseThrow(() -> new NaoAutorizadoException("usuário não registrado!"));
@@ -92,12 +95,12 @@ public class ServicoAutenticacao {
 
 		repositorioUsuario.save(usuario);
 		repositorioConta.save(conta);
-		log.info("registro realizado! usuário:{}, conta:{}, agencia:{}, numero:{}", usuario.getUsername(),
-				conta.getId(), conta.getAgencia(), conta.getNumero());
+		log.info(VERDE + "registro realizado! usuário:{}, conta:{}, agencia:{}, numero:{}" + RESETAR,
+				usuario.getUsername(), conta.getId(), conta.getAgencia(), conta.getNumero());
 	}
 
 	public TokensResponse refresh(RefreshRequestDto request) {
-		log.info("refresh requisitado!");
+		log.info(VERDE + "refresh requisitado!" + RESETAR);
 		servicoRefreshToken.validarEntidadeRefreshToken(request.refreshToken());
 		RefreshToken refresh = servicoRefreshToken.encontrarEntidadeRefreshToken(request.refreshToken());
 		servicoJwt.validarRefreshToken(request.refreshToken(), refresh.getUsuario());
@@ -113,7 +116,7 @@ public class ServicoAutenticacao {
 		servicoRefreshToken.gerarEntidadeRefreshToken(refreshToken, usuarioPortador);
 
 		TokensResponse tokensResponse = new TokensResponse(tokenAcesso, refreshToken);
-		log.info("refresh realizado! usuário: {}", usuarioPortador.getUsername());
+		log.info(VERDE + "refresh realizado! usuário: {}" + RESETAR, usuarioPortador.getUsername());
 		return tokensResponse;
 	}
 
@@ -123,7 +126,7 @@ public class ServicoAutenticacao {
 		CepResponseDto endereco = servicoCep.buscarEndereco(cep);
 
 		if (endereco == null || Boolean.TRUE.equals(endereco.erro())) {
-			log.warn("cep {} inválido!", cep);
+			log.warn(AMARELO + "cep {} inválido!" + RESETAR, cep);
 			throw new CepInvalidoException("cep inválido!");
 		}
 	}
@@ -136,12 +139,12 @@ public class ServicoAutenticacao {
 			throw new TelefoneJaExisteException("telefone já cadastrado!");
 		}
 		if (ChronoUnit.YEARS.between(request.dataNascimento(), LocalDate.now()) < 18) {
-			log.warn("usuário menor que 18 anos!");
+			log.warn(AMARELO + "usuário menor que 18 anos!" + RESETAR);
 			throw new IdadeNaoPermitidaException("voce ainda não possui a idade necessária para criar uma conta!");
 		}
 		Optional<Usuario> usuario = repositorioUsuario.findByLogin(request.login());
 		if (usuario.isPresent()) {
-			log.warn("usuário: {}, já está cadastrado!", request.login());
+			log.warn(AMARELO + "usuário: {}, já está cadastrado!" + RESETAR, request.login());
 			throw new UsuarioJaExisteException("usuario já cadastrado!");
 		}
 	}

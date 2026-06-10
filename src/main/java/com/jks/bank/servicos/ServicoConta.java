@@ -29,6 +29,9 @@ public class ServicoConta {
 	private final RepositorioUsuario repUsuario;
 	private final PasswordEncoder passwordEncoder;
 	private final ServicoApiCep servicoCep;
+	private static final String AMARELO = "\u001B[33m";
+	private static final String VERDE = "\u001B[32m";
+	private static final String RESETAR = "\u001B[0m";
 
 	public ServicoConta(RepositorioConta repConta, RepositorioUsuario repUsuario, PasswordEncoder passwordEncoder,
 			ServicoApiCep servicoCep) {
@@ -41,51 +44,54 @@ public class ServicoConta {
 
 	public ContaResponseDto contaUsuario() {
 		Conta conta = contaDoUsuarioAutenticado();
-		log.info("consulta de conta requisitada! conta:{}, usuário:{}", conta.getId(),
+		log.info(VERDE + "consulta de conta requisitada! conta:{}, usuário:{}" + RESETAR, conta.getId(),
 				conta.getUsuario().getUsername());
 		try {
 			CepResponseDto endereco = servicoCep.buscarEndereco(conta.getCep());
-			log.info("consulta de conta realizada com sucesso!");
+			log.info(VERDE + "consulta de conta realizada com sucesso!" + RESETAR);
 			return new ContaResponseDto(conta.getId(), conta.getAgencia(), conta.getNumero(), conta.getChavePix(),
 					conta.getSaldo(), conta.getStatus(), conta.getDataDaCriacao(), conta.getCep(), endereco.bairro(),
 					endereco.localidade(), endereco.uf(), endereco.estado(), endereco.regiao());
 		} catch (Exception e) {
-			log.warn("falha ao consultar CEP {}: {}", conta.getCep(), e.getMessage());
+			log.warn(AMARELO + "falha ao consultar CEP {}: {}" + RESETAR, conta.getCep(), e.getMessage());
 			return montarRespostaSemEndereco(conta);
 		}
 	}
 
 	@Transactional
 	public void bloquearConta(SenhaDto senha) {
-		log.info("bloqueio de conta requisitado!");
+		log.info(VERDE + "bloqueio de conta requisitado!" + RESETAR);
 		validarSenha(senha.senha());
 		Conta conta = contaDoUsuarioAutenticado();
 		conta.bloquearConta();
-		log.info("bloqueio realizado! conta: {}, usuário: {}", conta.getId(), conta.getUsuario().getUsername());
+		log.info(VERDE + "bloqueio realizado! conta: {}, usuário: {}" + RESETAR, conta.getId(),
+				conta.getUsuario().getUsername());
 	}
 
 	@Transactional
 	public void desbloquearConta(SenhaDto senha) {
-		log.info("desbloqueio de conta requisitado!");
+		log.info(VERDE + "desbloqueio de conta requisitado!" + RESETAR);
 		validarSenha(senha.senha());
 		Conta conta = contaDoUsuarioAutenticado();
 		conta.desbloquearConta();
-		log.info("desbloqueio realizado! conta: {}, usuário: {}", conta.getId(), conta.getUsuario().getUsername());
+		log.info(VERDE + "desbloqueio realizado! conta: {}, usuário: {}" + RESETAR, conta.getId(),
+				conta.getUsuario().getUsername());
 	}
 
 	@Transactional
 	public void encerrarConta(SenhaDto senha) {
-		log.info("encerramento de conta requisitado!");
+		log.info(VERDE + "encerramento de conta requisitado!" + RESETAR);
 		validarSenha(senha.senha());
 
 		Conta conta = contaDoUsuarioAutenticado();
 		if (conta.getSaldo().compareTo(BigDecimal.ZERO) > 0) {
-			log.warn("não foi possível encerrar a conta. conta:{}, usuário:{}, saldo:{}", conta.getId(),
-					conta.getUsuario().getUsername(), conta.getSaldo());
+			log.warn(AMARELO + "não foi possível encerrar a conta. conta:{}, usuário:{}, saldo:{}" + RESETAR,
+					conta.getId(), conta.getUsuario().getUsername(), conta.getSaldo());
 			throw new ContaComDinheiroException("não foi possível encerrar sua conta, pois ela contém dinheiro!");
 		}
 		conta.encerrarConta();
-		log.info("encerramento realizado! conta: {}, usuário: {}", conta.getId(), conta.getUsuario().getUsername());
+		log.info(VERDE + "encerramento realizado! conta: {}, usuário: {}" + RESETAR, conta.getId(),
+				conta.getUsuario().getUsername());
 	}
 
 	// CÓDIGO INTERNO
@@ -112,7 +118,7 @@ public class ServicoConta {
 		Usuario usuario = repUsuario.findByLogin(login)
 				.orElseThrow(() -> new UsuarioNaoEncontradoException("usuario não encontado!"));
 		if (!passwordEncoder.matches(senha, usuario.getPassword())) {
-			log.warn("senha inválida para o usuário {}", login);
+			log.warn(AMARELO + "senha inválida para o usuário {}" + RESETAR, login);
 			throw new SenhaInvalidaException("senha inválida!");
 		}
 	}

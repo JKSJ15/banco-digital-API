@@ -24,17 +24,19 @@ public class ConfigSecuranca {
 	}
 
 	@Bean
-	SecurityFilterChain correnteFiltro(HttpSecurity http) {
+	SecurityFilterChain correnteFiltro(HttpSecurity http) throws Exception {
 		return http.csrf(csrf -> csrf.disable())
 				.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 				.httpBasic(Customizer.withDefaults())
-				.authorizeHttpRequests(auth -> auth.requestMatchers(HttpMethod.POST, "/auth/login", "/auth/registro")
-						.permitAll().anyRequest().authenticated())
+				.authorizeHttpRequests(auth -> auth.requestMatchers(HttpMethod.POST, "/auth/login", "/auth/registro").permitAll()
+						.requestMatchers("/banco-doc/**", "/banco-doc", "/bank-api-doc/**", "/bank-api-doc",
+								"/swagger-ui/**", "/actuator/prometheus", "/actuator/health").permitAll()
+						.anyRequest().authenticated())
 				.addFilterBefore(filtro, UsernamePasswordAuthenticationFilter.class).build();
 	}
 
 	@Bean
-	AuthenticationManager gerenciadorAutenticacao(AuthenticationConfiguration config) {
+	AuthenticationManager gerenciadorAutenticacao(AuthenticationConfiguration config) throws Exception {
 		return config.getAuthenticationManager();
 	}
 

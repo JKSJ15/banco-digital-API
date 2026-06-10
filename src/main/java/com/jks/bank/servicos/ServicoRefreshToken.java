@@ -17,6 +17,8 @@ public class ServicoRefreshToken {
 	private static final Logger log = LoggerFactory.getLogger(ServicoRefreshToken.class);
 	private final RepositorioRefreshToken repositorioRefreshToken;
 	private final ServicoJwt jwtService;
+	private static final String AMARELO = "\u001B[33m";
+	private static final String RESETAR = "\u001B[0m";
 
 	public ServicoRefreshToken(RepositorioRefreshToken repositorioRefreshToken, ServicoJwt jwtService) {
 		super();
@@ -35,7 +37,7 @@ public class ServicoRefreshToken {
 
 	public RefreshToken encontrarEntidadeRefreshToken(String refreshToken) {
 		return repositorioRefreshToken.findByToken(refreshToken).orElseThrow(() -> {
-			log.warn("refresh token não encontrado");
+			log.warn(AMARELO + "refresh token não encontrado" + RESETAR);
 			return new RefreshTokenInvalidoException("refresh token inválido!");
 		});
 	}
@@ -43,11 +45,11 @@ public class ServicoRefreshToken {
 	public void validarEntidadeRefreshToken(String refreshToken) {
 		log.debug("validando entidade refresh token ");
 		RefreshToken refresh = repositorioRefreshToken.findByToken(refreshToken).orElseThrow(() -> {
-			log.warn("refresh token não encontrado");
+			log.warn(AMARELO + "refresh token não encontrado" + RESETAR);
 			return new RefreshTokenInvalidoException("refresh token inválido!");
 		});
 		if (refresh.tokenEstaExpirado()) {
-			log.warn("refresh token expirado para usuário {}", refresh.getUsuario().getUsername());
+			log.warn(AMARELO + "refresh token expirado para usuário {}" + RESETAR, refresh.getUsuario().getUsername());
 			throw new RefreshTokenInvalidoException("refresh token inválido!");
 		}
 	}

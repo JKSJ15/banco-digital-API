@@ -4,11 +4,19 @@ import java.time.LocalDateTime;
 
 import org.springframework.http.HttpStatus;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
+
+@Schema(description = "Corpo padrão de erro retornado pela API")
 public class CorpoException {
-	private String mensagem;
-	private LocalDateTime tempo;
-	private HttpStatus erro;
-	private int valor;
+	@Schema(example = "senha inválida!")
+	String mensagem;
+	@Schema(example = "2026-06-10T10:30:15")
+	LocalDateTime tempo;
+	@Schema(example = "BAD_REQUEST")
+	HttpStatus erro;
+	@Schema(example = "400")
+	int valor;
 
 	public CorpoException(String mensagem, LocalDateTime tempo, HttpStatus erro, int valor) {
 		super();

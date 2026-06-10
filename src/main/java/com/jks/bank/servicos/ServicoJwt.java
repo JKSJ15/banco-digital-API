@@ -20,6 +20,9 @@ import com.jks.bank.entidades.Usuario;
 public class ServicoJwt {
 	private static final Logger log = LoggerFactory.getLogger(ServicoJwt.class);
 	private Algorithm algorithm;
+	private static final String AMARELO = "\u001B[33m";
+	private static final String VERMELHO = "\u001B[31m";
+	private static final String RESETAR = "\u001B[0m";
 
 	public ServicoJwt(@Value("${api.security.token.secret}") String CHAVE_SECRETA) {
 		this.algorithm = Algorithm.HMAC256(CHAVE_SECRETA);
@@ -33,7 +36,7 @@ public class ServicoJwt {
 					.withExpiresAt(criarTempoDeExpiracaoTokenAcesso()).withIssuer("BancoDigitalAPI")
 					.withSubject(usuario.getUsername()).sign(algorithm);
 		} catch (JWTCreationException e) {
-			log.error("erro ao gerar token de acesso", e);
+			log.error(VERMELHO + "erro ao gerar token de acesso" + RESETAR, e);
 			return null;
 		}
 
@@ -44,7 +47,7 @@ public class ServicoJwt {
 			String login = JWT.require(algorithm).withIssuer("BancoDigitalAPI").build().verify(token).getSubject();
 			return login;
 		} catch (JWTVerificationException e) {
-			log.warn("token de acesso inválido: {}", e.getMessage());
+			log.warn(AMARELO + "token de acesso inválido: {}" + RESETAR, e.getMessage());
 			return null;
 		}
 	}
@@ -57,7 +60,7 @@ public class ServicoJwt {
 					.withExpiresAt(Date.from(criarTempoDeExpiracaoRefreshToken())).withIssuer("BancoDigitalAPI")
 					.withSubject(usuario.getUsername()).sign(algorithm);
 		} catch (JWTCreationException e) {
-			log.error("erro ao gerar refresh token", e);
+			log.error(VERMELHO + "erro ao gerar refresh token" + RESETAR, e);
 			throw new RuntimeException("erro na geração do token");
 		}
 	}
@@ -69,7 +72,7 @@ public class ServicoJwt {
 					.verify(token);
 			return true;
 		} catch (JWTVerificationException e) {
-			log.warn("erro ao validar refresh token: {}", e.getMessage());
+			log.warn(AMARELO + "erro ao validar refresh token: {}" + RESETAR, e.getMessage());
 			return false;
 		}
 	}
