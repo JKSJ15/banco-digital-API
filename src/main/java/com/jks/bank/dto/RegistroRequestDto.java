@@ -9,7 +9,7 @@ import jakarta.validation.constraints.NotNull;
 @Schema(description = "Dados necessários para o cadastro de um novo usuário no sistema.")
 public record RegistroRequestDto(
 		@NotBlank(message = "nome não pode ser nulo!") @Schema(description = "Nome completo do usuário.", example = "João da Silva") String nome,
-		@NotBlank(message = "cpf não pode ser nulo!") @Schema(description = "CPF do usuário contendo apenas números.", example = "12345678910") String cpf,
+		@NotBlank(message = "cpf não pode ser nulo!") @Schema(description = "CPF do usuário contendo apenas números.", example = "99999999999") String cpf,
 		@NotBlank(message = "login não pode ser nulo!") @Schema(description = "Login utilizado para autenticação no sistema.", example = "teste@email.com") String login,
 		@NotBlank(message = "senha inválida!") @Schema(description = "Senha de acesso da conta.", example = "123") String senha,
 		@NotNull(message = "data de nascimento não pode ser nula!") @Schema(description = "Data de nascimento do usuário.", example = "2000-10-27") LocalDate dataNascimento,

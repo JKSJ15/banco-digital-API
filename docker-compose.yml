@@ -1,0 +1,55 @@
+services:
+ 
+  db:
+    image: mysql:8.3
+    container_name: jks-bank-db
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      - jks-bank-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${MYSQL_ROOT_PASSWORD}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+ 
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: jks-bank-app
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://db:3306/${MYSQL_DATABASE}?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=America/Sao_Paulo
+      SPRING_DATASOURCE_USERNAME: ${MYSQL_USER}
+      SPRING_DATASOURCE_PASSWORD: ${MYSQL_PASSWORD}
+      API_SECURITY_TOKEN_SECRET: ${API_SECURITY_TOKEN_SECRET}
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+      SPRING_JPA_SHOW_SQL: "true"
+      SPRING_WEB_ERROR_INCLUDE_STACKTRACE: never
+      SPRINGDOC_API_DOCS_PATH: /bank-api-doc
+      SPRINGDOC_SWAGGER_UI_PATH: /banco-doc
+	  LOGGING_LEVEL_COM_SPRING_BANK: ${LOGGING_LEVEL_COM_SPRING_BANK}
+	  LOGGING_LEVEL_ROOT: ${LOGGING_LEVEL_ROOT}
+    ports:
+      - "8080:8080"
+    networks:
+      - jks-bank-network
+ 
+volumes:
+  mysql_data:
+ 
+networks:
+  jks-bank-network:
+    driver: bridge
