@@ -1,5 +1,5 @@
 services:
- 
+
   db:
     image: mysql:8.3
     container_name: jks-bank-db
@@ -16,11 +16,12 @@ services:
     networks:
       - jks-bank-network
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${MYSQL_ROOT_PASSWORD}"]
+      test: ["CMD-SHELL", "mysqladmin ping -h localhost -uroot -p$$MYSQL_ROOT_PASSWORD || exit 1"]
       interval: 10s
       timeout: 5s
-      retries: 5
- 
+      retries: 10
+      start_period: 30s
+
   app:
     build:
       context: .
@@ -40,16 +41,16 @@ services:
       SPRING_WEB_ERROR_INCLUDE_STACKTRACE: never
       SPRINGDOC_API_DOCS_PATH: /bank-api-doc
       SPRINGDOC_SWAGGER_UI_PATH: /banco-doc
-	  LOGGING_LEVEL_COM_SPRING_BANK: ${LOGGING_LEVEL_COM_SPRING_BANK}
-	  LOGGING_LEVEL_ROOT: ${LOGGING_LEVEL_ROOT}
+      LOGGING_LEVEL_COM_SPRING_BANK: ${LOGGING_LEVEL_COM_SPRING_BANK}
+      LOGGING_LEVEL_ROOT: ${LOGGING_LEVEL_ROOT}
     ports:
       - "8080:8080"
     networks:
       - jks-bank-network
- 
+
 volumes:
   mysql_data:
- 
+
 networks:
   jks-bank-network:
     driver: bridge
