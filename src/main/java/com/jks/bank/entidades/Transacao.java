@@ -76,6 +76,14 @@ public class Transacao {
 		return saldoPosterior;
 	}
 
+	public void setSaldoAnterior(BigDecimal saldoAnterior) {
+		this.saldoAnterior = saldoAnterior;
+	}
+
+	public void setSaldoPosterior(BigDecimal saldoPosterior) {
+		this.saldoPosterior = saldoPosterior;
+	}
+
 	public void setId(Long id) {
 		this.id = id;
 	}
