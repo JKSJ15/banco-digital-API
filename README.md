@@ -297,6 +297,21 @@ O projeto possui:
 * Extrato
 * Relatório mensal
 
+## Testes Unitários
+
+### Conta
+
+* Consulta
+* Bloqueio
+* Desbloqueio
+* Encerramento
+
+### Transações
+
+* Pix
+* Transferência
+* Saque
+* Depósito
 ---
 
 # 📂 Arquitetura
