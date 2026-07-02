@@ -22,7 +22,7 @@ public class RefreshToken {
 	@ManyToOne
 	@JoinColumn(name = "usuario_id", nullable = false)
 	private Usuario usuario;
-	@Column(name = "expira_em", unique = true, nullable = false)
+	@Column(name = "expira_em", nullable = false)
 	private Instant expiraEm;
 
 	private RefreshToken(Builder builder) {

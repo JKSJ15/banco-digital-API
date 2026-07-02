@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.test.context.ActiveProfiles;
 
 import com.jks.bank.entidades.Conta;
 import com.jks.bank.entidades.StatusDaConta;
@@ -23,6 +24,7 @@ import com.jks.bank.entidades.Usuario;
 import com.jks.bank.util.RetornaEntidades;
 
 @DataJpaTest
+@ActiveProfiles("test")
 public class TesteRepositorioTransacao {
 	@Autowired
 	RepositorioTransacao repositorioTransacao;
